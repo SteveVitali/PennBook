@@ -1,5 +1,5 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  #app.container
+  input#user(type='hidden' value=JSON.stringify(user))

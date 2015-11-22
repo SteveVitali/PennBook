@@ -22,6 +22,7 @@ app.use(cookieParser());
 
 // Expose public directory
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'node_modules')));
 
 // Initialize routes
 require('./routes')(app);
