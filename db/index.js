@@ -16,23 +16,32 @@ var User = vogels.define('User', {
     school: Joi.string(),
     work: Joi.string(),
     interests: vogels.types.stringSet(),
-    createdAt: Joi.date()
+    createdAt: Joi.date(),
+    isLoggedIn: Joi.boolean()
   },
   indexes: [
     // Example of a global index (different hashKey)
     { hashKey: 'school',
       rangeKey: 'lastName',
       name: 'SchoolIndex',
-      type: 'global' 
+      type: 'global'
+    },
+    { hashKey: 'work',
+      rangeKey: 'lastName',
+      name: 'SchoolIndex',
+      type: 'global'
     }
   ]
 });
 
 var Status = vogels.define('Status', {
-  hashKey: 'posterEmail',
+  hashKey: 'recipientEmail',
   rangeKey: 'statusId',
   schema: {
     posterEmail: Joi.string(),
+    // recipient === poster in case of self-post.
+    // in case of wall-post, recipient is the email of the wall posted on
+    recipientEmail: Joi.string(),
     statusId: Joi.number(),
     datePosted: Joi.date(),
     content: Joi.string(),
@@ -40,10 +49,15 @@ var Status = vogels.define('Status', {
   },
   indexes: [
     // Example of a local index (different hashKey)
-    { hashKey: 'posterEmail',
+    { hashKey: 'recipientEmail',
       rangeKey: 'datePosted',
       name: 'DatePostedIndex',
-      type: 'local' 
+      type: 'local'
+    },
+    { hashKey: 'posterEmail',
+      rangeKey: 'datePosted',
+      name: 'RecipientEmailIndex',
+      type: 'global'
     }
   ]
 });
@@ -56,8 +70,36 @@ var Comment = vogels.define('Comment', {
     content: String,
     likes: vogels.types.stringSet(), // liker emails
     datePosted: Joi.date(),
-    commenter: Joi.string() // email
-  }
+    commenterEmail: Joi.string() // email
+  },
+  indexes: [
+    { hashKey: 'commenterEmail',
+      rangeKey: 'datePosted',
+      name: 'CommenterEmailIndex',
+      type: 'global'
+    }
+  ]
+});
+
+// We store for each friendship, two rows in the KVS.
+// This makes it easy to query for all friends of a user
+// without having to store every friend in one huge StringSet.
+// (I'm open to a better design but this is the best I could come up with)
+var Friend = vogels.define('Friend', {
+  hashKey: 'ownerEmail',
+  rangeKey: 'dateFriended',
+  schema: {
+    ownerEmail: Joi.string(),
+    friendEmail: Joi.string(),
+    dateFriended: Joi.date()
+  },
+  indexes: [
+    { hashKey: 'friendEmail',
+      rangeKey: 'dateFriended',
+      name: 'FriendEmailIndex',
+      type: 'global'
+    }
+  ]
 });
 
 module.exports = {
