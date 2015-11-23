@@ -102,6 +102,25 @@ var Friend = vogels.define('Friend', {
   ]
 });
 
+// When a request is accepted or denied, the entry
+// is just removed from this table.
+var FriendRequest = vogels.define('FriendRequest', {
+  // Sort by the email of the person getting requested for simple fetches
+  hashKey: 'requesteeEmail',
+  rangeKey: 'requesterEmail',
+  schema: {
+    requesteeEmail: Joi.string(),
+    requesterEmail: Joi.string()
+  },
+  indexes: [
+    { hashKey: 'requesterEmail',
+      rangeKey: 'requesteeEmail',
+      name: 'RequesterEmailIndex',
+      type: 'global'
+    }
+  ]
+});
+
 // This is a generic bucket for all of a user's
 // status updates, new friendships, profile updates, etc.
 // I'm thinking that maybe we'll have to have a MapReduce job that
