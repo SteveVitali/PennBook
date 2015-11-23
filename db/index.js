@@ -67,7 +67,7 @@ var Comment = vogels.define('Comment', {
   rangeKey: 'datePosted',
   schema: {
     statusId: Joi.string(),
-    content: String,
+    content: Joi.string(),
     likes: vogels.types.stringSet(), // liker emails
     datePosted: Joi.date(),
     commenterEmail: Joi.string() // email
@@ -102,8 +102,25 @@ var Friend = vogels.define('Friend', {
   ]
 });
 
+// This is a generic bucket for all of a user's
+// status updates, new friendships, profile updates, etc.
+// I'm thinking that maybe we'll have to have a MapReduce job that
+// crunches this data into a NewsFeed. Otherwise we'll have to query
+// on it for all friends of a user every time we load news feed.
+var Action = vogels.define('Action', {
+  hashKey: 'actorEmail',
+  rangeKey: 'datetime',
+  schema: {
+    actorEmail: Joi.string(),
+    datetime: Joi.date(),
+    actionData: Joi.string() // arbitrary stringified JSON data
+  }
+});
+
 module.exports = {
   User: User,
   Status: Status,
-  Comment: Comment
+  Comment: Comment,
+  Friend: Friend,
+  Action: Action
 };
