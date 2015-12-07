@@ -15,5 +15,6 @@ module.exports = {
   Status: Status,
   Comment: Comment,
   Friend: Friend,
-  Action: Action
+  Action: Action,
+  FriendRequest: FriendRequest
 };
