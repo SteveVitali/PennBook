@@ -3,7 +3,7 @@ var router = express.Router();
 
 var api = require('../controllers/api');
 var user = require('../controllers/user');
-var friend = require('./controllers/friend');
+var friend = require('../controllers/friend');
 
 // Middleware that redirects a route to '/'
 // if the user is not logged in.
@@ -16,7 +16,9 @@ var loggedIn = function(req, res, next) {
 
 module.exports = function(app) {
   app.get('/', function(req, res) {
-    res.render('index', req.session.user || {});
+    res.render('index', {
+      user: req.session.user || null
+    });
   });
 
   app.post('/login', user.login);
