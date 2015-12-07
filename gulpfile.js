@@ -4,16 +4,18 @@ var browserify = require('browserify');
 var babelify = require('babelify');
 var reactify = require('reactify');
 var watchify = require('watchify');
+var resolutions = require('browserify-resolutions');
 
 gulp.task('browserify', function() {
   var bundler = browserify({
-    entries: ['./public/js/index.jsx'],
+    entries: ['./public/views/index.jsx'],
     paths: ['./node_modules','./public/js'],
-    transform: [babelify],
+    transform: [reactify],
     debug: true,
     // Required properties for watchify
     cache: {}, packageCache: {}, fullPaths: true
-  });
+  }).plugin(resolutions, '*');
+
   var watcher = watchify(bundler);
   return watcher.on('update', function() {
       var updateStart = Date.now();
