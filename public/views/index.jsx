@@ -18,7 +18,9 @@ var App = Backbone.View.extend({
 
     appStore.registerModel('Users', models.User.collection, '/api/users');
 
-    var rootProps = {};
+    var rootProps = {
+      parent: this
+    };
     var rootParentNode = document.getElementById('app');
 
     var rootNode = (() => {

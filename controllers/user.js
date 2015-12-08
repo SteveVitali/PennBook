@@ -4,7 +4,7 @@ var User = require('../db').User;
 
 var onErr = function(err, res) {
   err && console.log(err);
-  // res.redirect(redirect || '/');
+  res.status(500).send(err);
 };
 
 exports.login = function(req, res) {
@@ -17,8 +17,11 @@ exports.login = function(req, res) {
 
   User.findByEmail(email, function(err, user) {
     if (err) return onErr(err, res);
-    console.log('Found user', user, 'with email', email);
-    // Now validate password hash
+    if (!user) return onErr('Invalid email', res);
+    if (!passwordHash.verify(password, user.passwordHash)) {
+      return onErr('Invalid password', res);
+    }
+    res.send(user);
   });
 };
 
@@ -48,7 +51,7 @@ exports.signup = function(req, res) {
 
     User.create(newUser, function(err, user) {
       if (err) return onErr(err, res);
-      console.log('Created new user', user);
+      res.send(user);
     });
   });
 };

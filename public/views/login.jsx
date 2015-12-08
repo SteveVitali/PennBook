@@ -128,8 +128,12 @@ var LoginView = React.createClass({
       type: 'post',
       url: '/login',
       data: _.pick(this.state, 'email', 'password'),
-      success: function(ayy, lmao) {
-        console.log('Login', ayy, lmao);
+      success: (user) => {
+        this.props.parent.user = user;
+        this.props.parent.render();
+      },
+      error: (err) => {
+        console.log(err);
       }
     });
   },
@@ -145,8 +149,12 @@ var LoginView = React.createClass({
       type: 'post',
       url: '/signup',
       data: user,
-      success: function(ayy, lmao) {
-        console.log('Signup worked', ayy, lmao);
+      success: (newUser) => {
+        this.props.parent.user = newUser;
+        this.props.parent.render();
+      },
+      error: (err) => {
+        console.log(err);
       }
     });
   }
