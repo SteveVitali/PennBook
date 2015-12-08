@@ -3,6 +3,7 @@ var AppStore = require('react-backbone-app-store');
 var $ = require('jquery');
 var Backbone = require('backbone');
 var LoginView = require('./login.jsx');
+var NewsFeedView = require('./news-feed.jsx');
 var models = require('../models');
 
 var App = Backbone.View.extend({
@@ -19,13 +20,13 @@ var App = Backbone.View.extend({
     appStore.registerModel('Users', models.User.collection, '/api/users');
 
     var rootProps = {
-      parent: this
+      app: this
     };
     var rootParentNode = document.getElementById('app');
 
     var rootNode = (() => {
       if (!this.user) return LoginView;
-      return null;
+      return NewsFeedView;
     })();
 
     // Render the application

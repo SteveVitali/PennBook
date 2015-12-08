@@ -5,9 +5,14 @@ var ReactBootstrap = require('react-bootstrap');
 var FormGenerator = require('form-generator-react');
 
 var LoginView = React.createClass({
-  propTypes: {},
+  propTypes: {
+    app: React.PropTypes.object.isRequired
+  },
+
   getDefaultProps() {
-    return {};
+    return {
+      app: null
+    };
   },
 
   getInitialState() {
@@ -21,6 +26,43 @@ var LoginView = React.createClass({
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ],
+
+  login() {
+    console.log('logging it');
+    $.ajax({
+      type: 'post',
+      url: '/login',
+      data: _.pick(this.state, 'email', 'password'),
+      success: (user) => {
+        this.props.app.user = user;
+        this.props.app.render();
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  },
+
+  signup(user) {
+    user.birthdate = new Date(
+      user.birthday.year,
+      this.months.indexOf(user.birthday.month),
+      user.birthday.day
+    );
+
+    $.ajax({
+      type: 'post',
+      url: '/signup',
+      data: user,
+      success: (newUser) => {
+        this.props.app.user = newUser;
+        this.props.app.render();
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  },
 
   render() {
     var Nav = ReactBootstrap.Nav;
@@ -120,43 +162,6 @@ var LoginView = React.createClass({
         </div>
       </span>
     );
-  },
-
-  login() {
-    console.log('logging it');
-    $.ajax({
-      type: 'post',
-      url: '/login',
-      data: _.pick(this.state, 'email', 'password'),
-      success: (user) => {
-        this.props.parent.user = user;
-        this.props.parent.render();
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
-  },
-
-  signup(user) {
-    user.birthdate = new Date(
-      user.birthday.year,
-      this.months.indexOf(user.birthday.month),
-      user.birthday.day
-    );
-
-    $.ajax({
-      type: 'post',
-      url: '/signup',
-      data: user,
-      success: (newUser) => {
-        this.props.parent.user = newUser;
-        this.props.parent.render();
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
   }
 });
 

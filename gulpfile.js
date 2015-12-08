@@ -8,7 +8,7 @@ var resolutions = require('browserify-resolutions');
 
 gulp.task('browserify', function() {
   var bundler = browserify({
-    entries: ['./public/views/index.jsx'],
+    entries: ['./public/views/app.js'],
     paths: ['./node_modules','./public/js'],
     transform: [reactify],
     debug: true,
