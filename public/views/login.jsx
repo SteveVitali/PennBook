@@ -10,9 +10,7 @@ var LoginView = React.createClass({
   },
 
   getDefaultProps() {
-    return {
-      app: null
-    };
+    return {};
   },
 
   getInitialState() {
@@ -35,7 +33,7 @@ var LoginView = React.createClass({
       data: _.pick(this.state, 'email', 'password'),
       success: (user) => {
         this.props.app.user = user;
-        this.props.app.render();
+        this.props.app.newsFeed();
       },
       error: (err) => {
         console.log(err);
@@ -56,7 +54,7 @@ var LoginView = React.createClass({
       data: user,
       success: (newUser) => {
         this.props.app.user = newUser;
-        this.props.app.render();
+        this.props.app.newsFeed();
       },
       error: (err) => {
         console.log(err);

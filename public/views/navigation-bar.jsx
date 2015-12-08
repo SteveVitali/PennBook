@@ -9,9 +9,7 @@ var NavigationBarView = React.createClass({
   },
 
   getDefaultProps() {
-    return {
-      app: null
-    };
+    return {};
   },
 
   getInitialState() {
@@ -25,10 +23,6 @@ var NavigationBarView = React.createClass({
   },
 
   render() {
-    var Nav = ReactBootstrap.Nav;
-    var Navbar = ReactBootstrap.Navbar;
-    var NavItem = ReactBootstrap.NavItem;
-    var NavBrand = ReactBootstrap.NavBrand;
     var Input = ReactBootstrap.Input;
     var NavDropdown = ReactBootstrap.NavDropdown;
     var MenuItem = ReactBootstrap.MenuItem;

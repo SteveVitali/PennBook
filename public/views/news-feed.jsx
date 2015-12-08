@@ -10,9 +10,7 @@ var NewsFeedView = React.createClass({
   },
 
   getDefaultProps() {
-    return {
-      app: null
-    };
+    return {};
   },
 
   getInitialState() {
@@ -42,7 +40,7 @@ var NewsFeedView = React.createClass({
             <a href='/#profile/edit'>Edit Profile</a>
           </Col>
           <Col md={8}>
-            <Panel header='Updated Status'>
+            <Panel header='Update Status'>
               <Input type='textarea' placeholder="What's on your mind?"
                 onChange={(e) => {
                   this.setState({ status: e.target.value });
