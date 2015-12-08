@@ -1,10 +1,10 @@
-module.exports = function(vogels) {
+module.exports = function(vogels, Joi) {
 
   var User = vogels.define('User', {
     hashKey: 'email',
     schema: {
       _id: vogels.types.uuid(),
-      email: Joi.string().email,
+      email: Joi.string().email(),
       passwordHash: Joi.string(),
       firstName: Joi.string(),
       lastName: Joi.string(),

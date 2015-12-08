@@ -1,4 +1,4 @@
-module.exports = function(vogels) {
+module.exports = function(vogels, Joi) {
   // We store for each friendship, two rows in the KVS.
   // This makes it easy to query for all friends of a user
   // without having to store every friend in one huge StringSet.

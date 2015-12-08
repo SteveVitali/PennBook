@@ -1,4 +1,4 @@
-module.exports = function(vogels) {
+module.exports = function(vogels, Joi) {
   // When a request is accepted or denied, the entry
   // is just removed from this table.
   var FriendRequest = vogels.define('FriendRequest', {

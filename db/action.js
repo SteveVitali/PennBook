@@ -1,4 +1,4 @@
-module.exports = function(vogels) {
+module.exports = function(vogels, Joi) {
   // This is a generic bucket for all of a user's
   // status updates, new friendships, profile updates, etc.
   // I'm thinking that maybe we'll have to have a MapReduce job that

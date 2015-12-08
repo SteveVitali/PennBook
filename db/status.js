@@ -1,4 +1,4 @@
-module.exports = function(vogels) {
+module.exports = function(vogels, Joi) {
 
   var Status = vogels.define('Status', {
     hashKey: 'recipientEmail',
