@@ -25,29 +25,28 @@ var App = Backbone.View.extend({
   },
 
   login() {
-    console.log('Render login');
     this.rootComponent = LoginView;
     this.render();
   },
 
   newsFeed() {
-    console.log('Render news feed');
     this.rootComponent = NewsFeedView;
     this.render();
   },
 
-  viewOwnProfile() {
-    console.log('Render own profile');
+  viewProfile(user) {
     this.rootComponent = UserProfileView;
     this.rootProps = {
-      profileOwner: this.user
+      profileOwner: user,
+      lazyLoadWithUserId: false
     };
     this.render();
   },
 
-  viewProfile(id) {
-    console.log('Render other profile');
-    this.rootComponent = UserProfileView;
+  viewProfileById(id) {
+    // Same as viewProfile, but asynchronously
+    // load the user and show a loading spinner
+    // in the UserProfileView while waiting
   },
 
   render() {
@@ -57,7 +56,7 @@ var App = Backbone.View.extend({
         app: this,
         user: this.user
       }),
-      this.rootComponent,
+      (this.user ? this.rootComponent : LoginView),
       this.el
     );
   }
@@ -67,7 +66,7 @@ var Router = Backbone.Router.extend({
   routes: {
     '': 'home',
     'profile': 'viewOwnProfile',
-    'profile/:id': 'viewProfile',
+    'profile/:id': 'viewProfileById',
     'profile/edit': 'editProfile'
   },
 
@@ -79,12 +78,12 @@ var Router = Backbone.Router.extend({
     this.app.user ? this.app.newsFeed() : this.app.login();
   },
 
-  viewProfile(id) {
+  viewProfileById(id) {
     // Need to figure out how to optionally lazy load.
   },
 
   viewOwnProfile() {
-    this.app.viewOwnProfile();
+    this.app.viewProfile(this.app.user);
   }
 });
 

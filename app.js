@@ -19,8 +19,8 @@ app.use(logger('dev'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(session({ secret: 's35510NZ3Kr17' }));
 app.use(cookieParser());
+app.use(session({ secret: 's35510NZ3Kr17' }));
 
 // Expose public directory
 app.use(express.static(path.join(__dirname, 'public')));

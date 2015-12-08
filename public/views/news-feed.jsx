@@ -31,7 +31,7 @@ var NewsFeedView = React.createClass({
     var Input = ReactBootstrap.Input;
     return (
       <span>
-        <NavigationBarView/>
+        <NavigationBarView app={this.props.app}/>
         <div className='container'>
         <Row>
           <Col md={2}>

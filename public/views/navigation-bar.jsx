@@ -22,6 +22,13 @@ var NavigationBarView = React.createClass({
     console.log('Searching for', searchTerm);
   },
 
+  logout() {
+    $.post('/logout', () => {
+      this.props.app.user = null;
+      this.props.app.login();
+    });
+  },
+
   render() {
     var Input = ReactBootstrap.Input;
     var NavDropdown = ReactBootstrap.NavDropdown;
@@ -61,8 +68,8 @@ var NavigationBarView = React.createClass({
               <NavDropdown title='Settings'>
                 <MenuItem href='/#profile'>View Profile</MenuItem>
                 <MenuItem href='/#profile/edit'>Edit Profile</MenuItem>
-                <MenuItem divider />
-                <MenuItem href='/#logout'>Log Out</MenuItem>
+                <MenuItem divider/>
+                <MenuItem onSelect={this.logout}>Log Out</MenuItem>
               </NavDropdown>
             </ul>
           </div>

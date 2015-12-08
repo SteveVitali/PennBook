@@ -25,14 +25,8 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/logout', function(req, res) {
-    if (isLoggedIn(req)) {
-      req.session.destroy();
-    }
-    res.redirect('/');
-  });
-
   app.post('/login', user.login);
+  app.post('/logout', user.logout);
   app.post('/signup', user.signup);
 
   app.get('/request-friend/:email', loggedIn, friend.request);

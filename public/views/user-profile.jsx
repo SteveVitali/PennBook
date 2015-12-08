@@ -7,8 +7,9 @@ var NavigationBarView = require('./navigation-bar.jsx');
 var UserProfileView = React.createClass({
   propTypes: {
     app: React.PropTypes.object.isRequired,
-    profileOwner: React.PropTypes.object.isRequired,
-    user: React.PropTypes.object.isRequired
+    profileOwner: React.PropTypes.object,
+    user: React.PropTypes.object.isRequired,
+    lazyLoadWithUserId: React.PropTypes.string
   },
 
   getDefaultProps() {
@@ -20,7 +21,6 @@ var UserProfileView = React.createClass({
   },
 
   render() {
-    console.log('ay', this.props);
     var Row = ReactBootstrap.Row;
     var Col = ReactBootstrap.Col;
     var Panel = ReactBootstrap.Panel;
@@ -28,9 +28,9 @@ var UserProfileView = React.createClass({
     var Input = ReactBootstrap.Input;
     return (
       <span>
-        <NavigationBarView/>
+        <NavigationBarView app={this.props.app}/>
         <div className='container'>
-          Profile for {this.props.user.firstName} {this.props.user.lastName}.
+          Profile for {this.props.profileOwner.firstName} {this.props.profileOwner.lastName}.
         </div>
       </span>
     );
