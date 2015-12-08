@@ -18,8 +18,11 @@ module.exports = function(vogels, Joi) {
     ]
   });
 
+  FriendRequest.config({ tableName: 'friend-requests' });
+
   return {
-    model: FriendRequest
+    model: FriendRequest,
+    tableName: 'friend-requests'
     // Additional FriendRequest functions here
   };
 };

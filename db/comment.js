@@ -19,8 +19,11 @@ module.exports = function(vogels, Joi) {
     ]
   });
 
+  Comment.config({ tableName: 'comments' });
+
   return {
-    model: Comment
+    model: Comment,
+    tableName: 'comments'
     // Additional Comment functions here
   };
 };

@@ -28,8 +28,11 @@ module.exports = function(vogels, Joi) {
     ]
   });
 
+  Status.config({ tableName: 'statuses' });
+
   return {
-    model: Status
+    model: Status,
+    tableName: 'statuses'
     // Additional Status functions here
   };
 };

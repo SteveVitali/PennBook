@@ -37,6 +37,7 @@ module.exports = function(vogels, Joi) {
 
   return {
     model: User,
+    tableName: 'users',
 
     // Additional User functions here
     findByEmail: function(email, callback) {

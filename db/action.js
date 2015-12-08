@@ -14,8 +14,11 @@ module.exports = function(vogels, Joi) {
     }
   });
 
+  Action.config({ tableName: 'actions' });
+
   return {
-    model: Action
+    model: Action,
+    tableName: 'actions'
     // Additional Action functions here
   };
 };

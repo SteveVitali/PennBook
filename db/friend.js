@@ -20,8 +20,11 @@ module.exports = function(vogels, Joi) {
     ]
   });
 
+  Friend.config({ tableName: 'friends' });
+
   return {
-    model: Friend
+    model: Friend,
+    tableName: 'friends'
     // Additional functions here
   };
 };
