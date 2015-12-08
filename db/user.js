@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 module.exports = function(vogels, Joi) {
 
   var User = vogels.define('User', {
@@ -13,7 +15,8 @@ module.exports = function(vogels, Joi) {
       work: Joi.string(),
       interests: vogels.types.stringSet(),
       createdAt: Joi.date(),
-      isLoggedIn: Joi.boolean()
+      isLoggedIn: Joi.boolean(),
+      gender: Joi.string()
     },
     indexes: [
       // Example of a global index (different hashKey)
@@ -30,8 +33,28 @@ module.exports = function(vogels, Joi) {
     ]
   });
 
+  User.config({ tableName: 'users' });
+
   return {
-    model: User
+    model: User,
+
     // Additional User functions here
+    findByEmail: function(email, callback) {
+      User.get(email, function(err, user) {
+        // The user object is stored in the 'attrs' field
+        callback(err, user && user.attrs);
+      });
+    },
+
+    create: function(user, params, callback) {
+      // Make params argument optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = null;
+      }
+      User.create(user, params || {}, function(err, userData) {
+        callback(err, userData && userData.attrs);
+      });
+    }
   };
 };
