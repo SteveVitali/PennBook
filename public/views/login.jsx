@@ -1,9 +1,27 @@
+var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var FormGenerator = require('form-generator-react');
 
 var LoginView = React.createClass({
+  propTypes: {},
+  getDefaultProps() {
+    return {};
+  },
+
+  getInitialState() {
+    return {
+      email: '',
+      password: ''
+    };
+  },
+
+  months: [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ],
+
   render() {
     var Nav = ReactBootstrap.Nav;
     var Navbar = ReactBootstrap.Navbar;
@@ -48,10 +66,7 @@ var LoginView = React.createClass({
         type: {
           month: {
             type: String,
-            enum: [
-              'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-            ],
+            enum: this.months,
             label: 'Month'
           },
           day: {
@@ -78,10 +93,16 @@ var LoginView = React.createClass({
         <Navbar inverse toggleNavKey={0}>
           <NavBrand>PennBook</NavBrand>
           <Nav right eventKey={0}>
-            <form className='navbar-form' action='/login' method='post'>
-              <Input type='text' placeholder='email' />
-              <Input type='text' placeholder='password' />
-              <Button bsStyle='success' type='submit'>Log In</Button>
+            <form className='navbar-form' action='#'>
+              <Input type='text' placeholder='email' name='email'
+                onChange={(e) => {
+                  this.setState({ email: e.target.value });
+              }}/>
+              <Input type='password' placeholder='password' name='password'
+                onChange={(e) => {
+                  this.setState({ password: e.target.value });
+              }}/>
+              <Button onClick={this.login} bsStyle='success'>Log In</Button>
             </form>
           </Nav>
         </Navbar>
@@ -101,8 +122,33 @@ var LoginView = React.createClass({
     );
   },
 
-  signup(data) {
-    console.log('Sign up', data);
+  login() {
+    console.log('logging it');
+    $.ajax({
+      type: 'post',
+      url: '/login',
+      data: _.pick(this.state, 'email', 'password'),
+      success: function(ayy, lmao) {
+        console.log('Login', ayy, lmao);
+      }
+    });
+  },
+
+  signup(user) {
+    user.birthdate = new Date(
+      user.birthday.year,
+      this.months.indexOf(user.birthday.month),
+      user.birthday.day
+    );
+
+    $.ajax({
+      type: 'post',
+      url: '/signup',
+      data: user,
+      success: function(ayy, lmao) {
+        console.log('Signup worked', ayy, lmao);
+      }
+    });
   }
 });
 
