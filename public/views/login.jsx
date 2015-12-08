@@ -78,7 +78,7 @@ var LoginView = React.createClass({
         <Navbar inverse toggleNavKey={0}>
           <NavBrand>PennBook</NavBrand>
           <Nav right eventKey={0}>
-            <form className='navbar-form' action="">
+            <form className='navbar-form' action='/login' method='post'>
               <Input type='text' placeholder='email' />
               <Input type='text' placeholder='password' />
               <Button bsStyle='success' type='submit'>Log In</Button>

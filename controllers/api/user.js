@@ -1,3 +1,3 @@
-exports.get = function(req, res) {
+exports.findByEmail = function(req, res) {
 
 };
