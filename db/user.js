@@ -16,7 +16,10 @@ module.exports = function(vogels, Joi) {
       interests: vogels.types.stringSet(),
       createdAt: Joi.date(),
       isLoggedIn: Joi.boolean(),
-      gender: Joi.string()
+      gender: Joi.string(),
+      coverPhotoUrl: Joi.string(),
+      profilePhotoUrl: Joi.string(),
+      phoneNumber: Joi.string()
     },
     indexes: [
       // Example of a global index (different hashKey)

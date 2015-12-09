@@ -34,12 +34,11 @@ var App = Backbone.View.extend({
     this.render();
   },
 
-  viewProfile(user) {
+  viewProfile(user, props) {
     this.rootComponent = UserProfileView;
-    this.rootProps = {
-      profileOwner: user,
-      lazyLoadWithUserId: false
-    };
+    this.rootProps = _.extend(props || {}, {
+      profileOwner: user
+    });
     this.render();
   },
 
@@ -50,13 +49,17 @@ var App = Backbone.View.extend({
   },
 
   render() {
+    if (!this.user) {
+      this.router.navigate('/');
+      this.rootComponent = LoginView;
+    }
     // Render the React application
     this.appStore.resetData(
       _.extend(this.rootProps, {
         app: this,
         user: this.user
       }),
-      (this.user ? this.rootComponent : LoginView),
+      this.rootComponent,
       this.el
     );
   }
@@ -66,7 +69,7 @@ var Router = Backbone.Router.extend({
   routes: {
     '': 'home',
     'profile': 'viewOwnProfile',
-    'profile/:id': 'viewProfileById',
+    'profile/id/:id': 'viewProfileById',
     'profile/edit': 'editProfile'
   },
 
@@ -83,7 +86,12 @@ var Router = Backbone.Router.extend({
   },
 
   viewOwnProfile() {
-    this.app.viewProfile(this.app.user);
+    console.log('view own');
+    this.app.viewProfile(this.app.user, { tabKey: 1 });
+  },
+
+  editProfile() {
+    this.app.viewProfile(this.app.user, { tabKey: 2 });
   }
 });
 
@@ -91,7 +99,7 @@ $(function() {
   var currentUser = JSON.parse($('#user').val());
   var app = new App(currentUser);
   var router = new Router(app);
-  app.router = app;
+  app.router = router;
 
   Backbone.history.start({ root: '/' });
 });

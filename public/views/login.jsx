@@ -26,7 +26,6 @@ var LoginView = React.createClass({
   ],
 
   login() {
-    console.log('logging it');
     $.ajax({
       type: 'post',
       url: '/login',
@@ -98,9 +97,8 @@ var LoginView = React.createClass({
       },
       'gender': {
         type: String,
-        enum: ['', 'male', 'female', 'other'],
-        label: 'Gender',
-        isRequired: true
+        enum: ['male', 'female', 'other'],
+        label: 'Gender'
       },
       'birthday': {
         type: {
@@ -126,7 +124,7 @@ var LoginView = React.createClass({
         },
         label: 'Birthday'
       }
-    }, 'signupForm', this.signup);
+    }, 'signupForm', this.signup, true);
 
     return (
       <span>

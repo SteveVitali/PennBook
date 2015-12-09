@@ -3,34 +3,67 @@ var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var NavigationBarView = require('./navigation-bar.jsx');
+var UserProfileInfoView = require('./user-profile-info.jsx');
 
 var UserProfileView = React.createClass({
   propTypes: {
     app: React.PropTypes.object.isRequired,
     profileOwner: React.PropTypes.object,
     user: React.PropTypes.object.isRequired,
-    lazyLoadWithUserId: React.PropTypes.string
+    lazyLoadWithUserId: React.PropTypes.string,
+    tabKey: React.PropTypes.number
   },
 
   getDefaultProps() {
-    return {};
+    return {
+      tabKey: 1
+    };
   },
 
   getInitialState() {
-    return {};
+    return {
+      tabKey: this.props.tabKey || 1
+    };
+  },
+
+  componentWillReceiveProps(nextProps) {
+    console.log('receiving dem props');
+    this.setState({
+      tabKey: nextProps.tabKey
+    });
+  },
+
+  handleSelectTab(key) {
+    this.props.app.router.navigate(
+      key === 2 ? '/profile/edit' : '/profile'
+    );
+    this.setState({
+      tabKey: key
+    });
   },
 
   render() {
-    var Row = ReactBootstrap.Row;
-    var Col = ReactBootstrap.Col;
-    var Panel = ReactBootstrap.Panel;
-    var Button = ReactBootstrap.Button;
-    var Input = ReactBootstrap.Input;
+    var Tabs = ReactBootstrap.Tabs;
+    var Tab = ReactBootstrap.Tab;
+    console.log('ayy lmao', this.props);
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
         <div className='container'>
-          Profile for {this.props.profileOwner.firstName} {this.props.profileOwner.lastName}.
+          <Tabs activeKey={this.state.tabKey}
+            animation={false}
+            onSelect={this.handleSelectTab}>
+            <Tab eventKey={1} title='Timeline'>
+              Timeline
+            </Tab>
+            <Tab eventKey={2} title='About'>
+              <br/>
+              <UserProfileInfoView profileOwner={this.props.profileOwner}/>
+            </Tab>
+            <Tab eventKey={3} title='Friends'>
+              Friends
+            </Tab>
+          </Tabs>
         </div>
       </span>
     );
