@@ -77,6 +77,18 @@ module.exports = function(vogels, Joi) {
       User.create(user, params || {}, function(err, userData) {
         callback(err, userData && userData.attrs);
       });
+    },
+
+    // updatedUser must contain _id
+    update: function(updatedUser, params, callback) {
+      // params are optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = null;
+      }
+      User.update(updatedUser, params || {}, function(err, user) {
+        callback(err, user && user.attrs);
+      });
     }
   };
 };

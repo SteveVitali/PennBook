@@ -22,7 +22,7 @@ exports.login = function(req, res) {
       return onErr('Invalid password', res);
     }
     req.session.user = user;
-    res.send(user);
+    res.send(_.omit(user, 'passwordHash'));
   });
 };
 
@@ -57,7 +57,8 @@ exports.signup = function(req, res) {
 
     User.create(newUser, function(err, user) {
       if (err) return onErr(err, res);
-      res.send(user);
+      req.session.user = user;
+      res.send(_.omit(user, 'passwordHash'));
     });
   });
 };
