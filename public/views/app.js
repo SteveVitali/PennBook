@@ -14,7 +14,10 @@ var App = Backbone.View.extend({
   initialize(user, router) {
     this.user = user;
     this.router = router;
-    this.rootProps = { app: this };
+    this.rootProps = {
+      app: this,
+      Users: _.compact([user])
+    };
     this.appStore = new AppStore();
 
     this.appStore.registerModel(
@@ -30,13 +33,17 @@ var App = Backbone.View.extend({
   },
 
   newsFeed() {
+    if (!_.findWhere(this.rootProps.Users, { _id: this.user._id })) {
+      this.rootProps.Users.push(this.user);
+    }
     this.rootComponent = NewsFeedView;
     this.render();
   },
 
   viewProfile(user, props) {
     this.rootComponent = UserProfileView;
-    this.rootProps = _.extend(props || {}, {
+    this.rootProps = _.extend(this.rootProps, props || {});
+    this.rootProps = _.extend(this.rootProps, {
       profileOwner: user
     });
     this.render();

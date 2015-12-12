@@ -7,6 +7,7 @@ var utils = require('../utils');
 
 var UserProfileInfoView = React.createClass({
   propTypes: {
+    appStore: React.PropTypes.object.isRequired,
     profileOwner: React.PropTypes.object,
     user: React.PropTypes.object.isRequired,
     tabKey: React.PropTypes.number
@@ -31,7 +32,14 @@ var UserProfileInfoView = React.createClass({
   },
 
   updateUser(updateObj) {
-    console.log('updating user with updateObj', updateObj);
+    this.props.appStore.set(
+      updateObj,
+      this.props.user._id,
+      'Users',
+      function() {
+        console.log('Successfully updated user');
+      }
+    );
   },
 
   updateUserInfo(updateObj) {

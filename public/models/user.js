@@ -1,7 +1,6 @@
-//import Backbone from 'backbone';
 var Backbone = require('backbone');
 
-exports.model = Backbone.Model.extend({
+var model = Backbone.Model.extend({
 
   idAttribute: '_id',
   urlRoot: '/api/users',
@@ -14,7 +13,12 @@ exports.model = Backbone.Model.extend({
   }
 });
 
-exports.collection = Backbone.Collection.extend({
-  model: exports.User,
+var collection = Backbone.Collection.extend({
+  model: model,
   url: '/api/users'
 });
+
+module.exports = {
+  model: model,
+  collection: collection
+};
