@@ -45,7 +45,6 @@ var UserProfileView = React.createClass({
   render() {
     var Tabs = ReactBootstrap.Tabs;
     var Tab = ReactBootstrap.Tab;
-    console.log('ayy lmao', this.props);
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
@@ -58,7 +57,9 @@ var UserProfileView = React.createClass({
             </Tab>
             <Tab eventKey={2} title='About'>
               <br/>
-              <UserProfileInfoView profileOwner={this.props.profileOwner}/>
+              <UserProfileInfoView
+                user={this.props.user}
+                profileOwner={this.props.profileOwner}/>
             </Tab>
             <Tab eventKey={3} title='Friends'>
               Friends
