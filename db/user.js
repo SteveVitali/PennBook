@@ -1,9 +1,10 @@
 var _ = require('lodash');
+var uuid = require('uuid');
 
 module.exports = function(vogels, Joi) {
 
   var User = vogels.define('User', {
-    hashKey: 'email',
+    hashKey: '_id',
     schema: {
       _id: vogels.types.uuid(),
       email: Joi.string().email(),
@@ -23,6 +24,11 @@ module.exports = function(vogels, Joi) {
     },
     indexes: [
       // Example of a global index (different hashKey)
+      { hashKey: 'email',
+        rangeKey: 'lastName',
+        name: 'EmailIndex',
+        type: 'global'
+      },
       { hashKey: 'school',
         rangeKey: 'lastName',
         name: 'SchoolIndex',
@@ -43,10 +49,21 @@ module.exports = function(vogels, Joi) {
     tableName: 'users',
 
     // Additional User functions here
-    findByEmail: function(email, callback) {
-      User.get(email, function(err, user) {
+    findById: function(id, callback) {
+      User.get(id, function(err, user) {
         // The user object is stored in the 'attrs' field
         callback(err, user && user.attrs);
+      });
+    },
+
+    findByEmail: function(email, callback) {
+      console.log('finding by email', email);
+      User
+      .query(email)
+      .usingIndex('EmailIndex')
+      .exec(function(err, data) {
+        var usersData = _.pluck(data.Items, 'attrs');
+        callback(err, usersData[0]);
       });
     },
 
@@ -56,6 +73,7 @@ module.exports = function(vogels, Joi) {
         callback = params;
         params = null;
       }
+      user._id = uuid.v4();
       User.create(user, params || {}, function(err, userData) {
         callback(err, userData && userData.attrs);
       });
