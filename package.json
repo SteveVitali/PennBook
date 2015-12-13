@@ -25,6 +25,8 @@
     "jade": "~1.11.0",
     "joi": "^7.0.0",
     "jquery": "^2.1.4",
+    "jquery-autocomplete": "^1.2.1",
+    "jquery-ui": "^1.10.5",
     "lodash": "^3.10.1",
     "morgan": "~1.6.1",
     "password-hash": "^1.2.2",
