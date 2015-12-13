@@ -15,7 +15,7 @@ exports.findById = function(req, res) {
 
 exports.update = function(req, res) {
   var id = req.params.id;
-  if (!req.session.user || req.session.user._id !== id) {
+  if (req.session.user._id !== id) {
     return onErr('Unauthorized', res);
   }
   User.update(req.body, function(err, updatedUser) {

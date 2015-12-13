@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var uuid = require('uuid');
 
-module.exports = function(vogels, Joi) {
+module.exports = function(vogels, Joi, CRUD) {
 
   var User = vogels.define('User', {
     hashKey: '_id',
@@ -44,16 +44,16 @@ module.exports = function(vogels, Joi) {
 
   User.config({ tableName: 'users' });
 
+  // Initialize CRUD helpers
+  CRUD = CRUD(User);
+
   return {
     model: User,
     tableName: 'users',
 
     // Additional User functions here
     findById: function(id, callback) {
-      User.get(id, function(err, user) {
-        // The user object is stored in the 'attrs' field
-        callback(err, user && user.attrs);
-      });
+      CRUD.findById(id, callback);
     },
 
     findByEmail: function(email, callback) {
@@ -68,27 +68,12 @@ module.exports = function(vogels, Joi) {
     },
 
     create: function(user, params, callback) {
-      // Make params argument optional
-      if (_.isFunction(params)) {
-        callback = params;
-        params = null;
-      }
-      user._id = uuid.v4();
-      User.create(user, params || {}, function(err, userData) {
-        callback(err, userData && userData.attrs);
-      });
+      CRUD.create(user, params, callback);
     },
 
     // updatedUser must contain _id
     update: function(updatedUser, params, callback) {
-      // params are optional
-      if (_.isFunction(params)) {
-        callback = params;
-        params = null;
-      }
-      User.update(updatedUser, params || {}, function(err, user) {
-        callback(err, user && user.attrs);
-      });
+      CRUD.update(updatedUser, params, callback);
     }
   };
 };

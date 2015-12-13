@@ -29,7 +29,7 @@
     "morgan": "~1.6.1",
     "password-hash": "^1.2.2",
     "react": "^0.13.3",
-    "react-backbone-app-store": "^1.0.3",
+    "react-backbone-app-store": "^1.0.6",
     "react-bootstrap": "0.26.2",
     "serve-favicon": "~2.3.0",
     "uuid": "^2.0.1",

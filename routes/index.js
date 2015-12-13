@@ -34,7 +34,9 @@ module.exports = function(app) {
   app.get('/deny-friend/:email', loggedIn, friend.denyRequest);
 
   // JSON endpoints
-  app.get('/api/users/:id', api.User.findById);
-  app.put('/api/users/:id', api.User.update);
+  app.get('/api/users/:id', loggedIn, api.User.findById);
+  app.put('/api/users/:id', loggedIn, api.User.update);
+
+  app.post('/api/statuses', loggedIn, api.Status.post);
   // ...
 };
