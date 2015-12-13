@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
+var moment = require('moment');
 var ReactBootstrap = require('react-bootstrap');
 var FormGenerator = require('form-generator-react');
 var utils = require('../utils');
@@ -62,10 +63,81 @@ var UserProfileInfoView = React.createClass({
     var Row = ReactBootstrap.Row;
     var Col = ReactBootstrap.Col;
 
+    var userId = this.props.app.user._id;
+    var ownerId = this.props.profileOwner._id;
+
+    var basicInfo = userId === ownerId
+      ? this.getBasicInfoForm()
+      : this.getBasicInfo();
+
+    var workAndEducation = userId === ownerId
+      ? this.getWorkAndEducationForm()
+      : this.getWorkAndEducation();
+
+    return (
+      <Panel header='About'>
+        <Tabs activeKey={this.state.tabKey} position='left'
+          tabWidth={3}
+          animation={false}
+          onSelect={this.handleSelectTab}>
+          <Tab eventKey={1} title='Contact and Basic Info'>
+            {basicInfo}
+          </Tab>
+          <Tab eventKey={2} title='Work and Education'>
+            {workAndEducation}
+          </Tab>
+        </Tabs>
+      </Panel>
+    );
+  },
+
+  getBasicInfo() {
+    var user = this.props.user;
+    return (
+      <div className='container'>
+        { _.map(['Email', 'Gender', 'Birthdate'], function(field) {
+          var accessor = field.toLowerCase();
+          return (
+            <span>
+              <strong>{field}: </strong>
+              { accessor === 'birthdate'
+                ? moment(new Date(user[accessor])).format('MMMM Do, YYYY')
+                : user[accessor]
+              }
+              <br/>
+            </span>
+          );
+        })}
+      </div>
+    );
+  },
+
+  getWorkAndEducation() {
+    var user = this.props.user;
+    return (
+      <div className='container'>
+        { _.map(['School', 'Work', 'Interests'], function(field) {
+          var accessor = field.toLowerCase();
+          return (
+            <span>
+              <strong>{field}: </strong>
+              { accessor !== 'interests'
+                ? user[accessor]
+                : (user[accessor] || []).join(', ')
+              }
+              <br/>
+            </span>
+          );
+        })}
+      </div>
+    );
+  },
+
+  getBasicInfoForm() {
     var user = this.props.user;
     var birthdate = new Date(user.birthdate);
 
-    var basicInfoForm = FormGenerator.create({
+    return FormGenerator.create({
       firstName: {
         type: String,
         label: 'First Name',
@@ -119,8 +191,11 @@ var UserProfileInfoView = React.createClass({
         label: 'Birthday'
       }
     }, 'basicInfoForm', this.updateUserInfo, true);
+  },
 
-    var workAndEducationForm = FormGenerator.create({
+  getWorkAndEducationForm() {
+    var user = this.props.user;
+    return FormGenerator.create({
       school: {
         type: String,
         label: 'School',
@@ -137,22 +212,6 @@ var UserProfileInfoView = React.createClass({
         defaultValue: user.interests
       }
     }, 'workAndEducationForm', this.updateUser, true);
-
-    return (
-      <Panel header='About'>
-        <Tabs activeKey={this.state.tabKey} position='left'
-          tabWidth={3}
-          animation={false}
-          onSelect={this.handleSelectTab}>
-          <Tab eventKey={1} title='Contact and Basic Info'>
-            {basicInfoForm}
-          </Tab>
-          <Tab eventKey={2} title='Work and Education'>
-            {workAndEducationForm}
-          </Tab>
-        </Tabs>
-      </Panel>
-    );
   }
 });
 

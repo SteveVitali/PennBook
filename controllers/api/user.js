@@ -18,6 +18,9 @@ exports.update = function(req, res) {
   if (req.session.user._id !== id) {
     return onErr('Unauthorized', res);
   }
+  // Emptystring's will throw a validation error for string sets
+  req.body.interests = _.compact(req.body.interests);
+
   User.update(req.body, function(err, updatedUser) {
     if (err) return onErr(err, res);
     res.send(_.omit(updatedUser, 'passwordHash'));

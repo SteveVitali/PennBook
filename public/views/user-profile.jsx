@@ -78,10 +78,10 @@ var UserProfileView = React.createClass({
               <Tab eventKey={2} title='About'>
                 <br/>
                 <UserProfileInfoView
-                  app={this.props.app}
-                  appStore={this.props.appStore}
-                  user={this.props.user}
-                  profileOwner={this.state.profileOwner}/>
+                 app={this.props.app}
+                 appStore={this.props.appStore}
+                 user={this.props.user}
+                 profileOwner={this.state.profileOwner}/>
               </Tab>
               <Tab eventKey={3} title='Friends'>
                 Friends
