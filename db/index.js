@@ -1,6 +1,7 @@
 var vogels = require('vogels');
 var Joi = require('joi');
 var _ = require('lodash');
+var uuid = require('uuid');
 
 vogels.AWS.config.loadFromPath('credentials.json');
 

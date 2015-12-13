@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 
@@ -19,7 +20,18 @@ var PostStatusFormView = React.createClass({
   },
 
   postStatus: function(e) {
-    console.log('Posting status', this.state.status);
+    if (!this.state.status) return;
+    $.ajax({
+      type: 'post',
+      url: '/api/statuses',
+      data: { content: this.state.status },
+      success: (status) => {
+        console.log('New status posted', status);
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
   },
 
   render() {

@@ -2,9 +2,9 @@ module.exports = function(vogels, Joi, CRUD) {
 
   var Status = vogels.define('Status', {
     hashKey: 'recipientId',
-    rangeKey: 'statusId',
+    rangeKey: '_id',
     schema: {
-      _id: Joi.number(),
+      _id: vogels.types.uuid(),
       posterId: Joi.string(),
       // recipient === poster in case of self-post.
       // in case of wall-post, recipient is the id of the wall posted on
