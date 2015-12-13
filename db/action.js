@@ -5,10 +5,10 @@ module.exports = function(vogels, Joi) {
   // crunches this data into a NewsFeed. Otherwise we'll have to query
   // on it for all friends of a user every time we load news feed.
   var Action = vogels.define('Action', {
-    hashKey: 'actorEmail',
+    hashKey: 'actorId',
     rangeKey: 'datetime',
     schema: {
-      actorEmail: Joi.string(),
+      actorId: vogels.types.uuid(),
       datetime: Joi.date(),
       actionData: Joi.string() // arbitrary stringified JSON data
     }

@@ -4,17 +4,17 @@ module.exports = function(vogels, Joi) {
   // without having to store every friend in one huge StringSet.
   // (I'm open to a better design but this is the best I could come up with)
   var Friend = vogels.define('Friend', {
-    hashKey: 'ownerEmail',
+    hashKey: 'ownerId',
     rangeKey: 'dateFriended',
     schema: {
-      ownerEmail: Joi.string(),
-      friendEmail: Joi.string(),
+      ownerId: vogels.types.uuid(),
+      friendId: vogels.types.uuid(),
       dateFriended: Joi.date()
     },
     indexes: [
-      { hashKey: 'friendEmail',
+      { hashKey: 'friendId',
         rangeKey: 'dateFriended',
-        name: 'FriendEmailIndex',
+        name: 'FriendIdIndex',
         type: 'global'
       }
     ]

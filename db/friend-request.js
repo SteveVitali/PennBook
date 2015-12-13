@@ -3,16 +3,16 @@ module.exports = function(vogels, Joi) {
   // is just removed from this table.
   var FriendRequest = vogels.define('FriendRequest', {
     // Sort by the email of the person getting requested for simple fetches
-    hashKey: 'requesteeEmail',
-    rangeKey: 'requesterEmail',
+    hashKey: 'requesteeId',
+    rangeKey: 'requesterId',
     schema: {
-      requesteeEmail: Joi.string(),
-      requesterEmail: Joi.string()
+      requesteeId: vogels.types.uuid(),
+      requesterId: vogels.types.uuid()
     },
     indexes: [
-      { hashKey: 'requesterEmail',
-        rangeKey: 'requesteeEmail',
-        name: 'RequesterEmailIndex',
+      { hashKey: 'requesterId',
+        rangeKey: 'requesteeId',
+        name: 'RequesterIdIndex',
         type: 'global'
       }
     ]

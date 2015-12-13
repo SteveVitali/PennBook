@@ -8,12 +8,12 @@ module.exports = function(vogels, Joi) {
       content: Joi.string(),
       likes: vogels.types.stringSet(), // liker emails
       datePosted: Joi.date(),
-      commenterEmail: Joi.string() // email
+      commenterId: vogels.types.uuid()
     },
     indexes: [
-      { hashKey: 'commenterEmail',
+      { hashKey: 'commenterId',
         rangeKey: 'datePosted',
-        name: 'CommenterEmailIndex',
+        name: 'CommenterIdIndex',
         type: 'global'
       }
     ]
