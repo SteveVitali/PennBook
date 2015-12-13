@@ -11,12 +11,11 @@ var models = require('../models');
 var App = Backbone.View.extend({
   el: '#app',
 
-  initialize(user, router) {
-    this.user = user;
+  initialize(router) {
     this.router = router;
     this.rootProps = {
       app: this,
-      Users: _.compact([user])
+      Users: []
     };
     this.appStore = new AppStore();
 
@@ -27,15 +26,41 @@ var App = Backbone.View.extend({
     );
   },
 
+  setUser(user, done) {
+    if (!user) return done && done();
+    var userId = user._id;
+    var cachedUser = this.appStore.getModel(userId, 'Users');
+    if (!cachedUser) {
+      console.log('Caching current user in app store');
+      // Make sure the user is cached in appStore.Users
+      this.appStore.fetch([userId], 'Users', () => {
+        // Store the user data from the app store
+        this.user = this.appStore.getModel(user._id, 'Users');
+
+        // Remove the user from the rootProps and add him back
+        this.rootProps.Users = _.reject(
+          this.rootProps.Users,
+          function(u) {
+            return u._id === userId;
+          }
+        );
+        this.rootProps.Users.push(this.user);
+
+        done && done();
+      });
+    } else {
+      this.user = cachedUser;
+      done && done();
+    }
+  },
+
   login() {
+    this.rootProps.Users = [];
     this.rootComponent = LoginView;
     this.render();
   },
 
   newsFeed() {
-    if (!_.findWhere(this.rootProps.Users, { _id: this.user._id })) {
-      this.rootProps.Users.push(this.user);
-    }
     this.rootComponent = NewsFeedView;
     this.render();
   },
@@ -60,6 +85,7 @@ var App = Backbone.View.extend({
       this.router.navigate('/');
       this.rootComponent = LoginView;
     }
+    console.log('rendering with user', this.user);
     // Render the React application
     this.appStore.resetData(
       _.extend(this.rootProps, {
@@ -104,9 +130,12 @@ var Router = Backbone.Router.extend({
 
 $(function() {
   var currentUser = JSON.parse($('#user').val());
-  var app = new App(currentUser);
-  var router = new Router(app);
-  app.router = router;
+  var app = new App();
+  // Wait for user to be loaded into app store
+  app.setUser(currentUser, function() {
+    var router = new Router(app);
+    app.router = router;
 
-  Backbone.history.start({ root: '/' });
+    Backbone.history.start({ root: '/' });
+  });
 });

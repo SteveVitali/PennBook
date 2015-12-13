@@ -7,6 +7,7 @@ var utils = require('../utils');
 
 var UserProfileInfoView = React.createClass({
   propTypes: {
+    app: React.PropTypes.object,
     appStore: React.PropTypes.object.isRequired,
     profileOwner: React.PropTypes.object,
     user: React.PropTypes.object.isRequired,
@@ -32,14 +33,12 @@ var UserProfileInfoView = React.createClass({
   },
 
   updateUser(updateObj) {
-    this.props.appStore.set(
-      updateObj,
-      this.props.user._id,
-      'Users',
-      function() {
-        console.log('Successfully updated user');
-      }
-    );
+    var userId = this.props.app.user._id;
+    var appStore = this.props.appStore;
+    appStore.set(updateObj, userId, 'Users', () => {
+      // Update app.user and re-render
+      this.props.app.setUser(this.props.user);
+    });
   },
 
   updateUserInfo(updateObj) {
@@ -65,8 +64,6 @@ var UserProfileInfoView = React.createClass({
 
     var user = this.props.user;
     var birthdate = new Date(user.birthdate);
-
-    console.log(user);
 
     var basicInfoForm = FormGenerator.create({
       firstName: {

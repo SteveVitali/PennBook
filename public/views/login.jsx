@@ -32,8 +32,9 @@ var LoginView = React.createClass({
       url: '/login',
       data: _.pick(this.state, 'email', 'password'),
       success: (user) => {
-        this.props.app.user = user;
-        this.props.app.newsFeed();
+        this.props.app.setUser(user, () => {
+          this.props.app.newsFeed();
+        });
       },
       error: (err) => {
         console.log(err);
@@ -53,8 +54,9 @@ var LoginView = React.createClass({
       url: '/signup',
       data: user,
       success: (newUser) => {
-        this.props.app.user = newUser;
-        this.props.app.newsFeed();
+        this.props.app.setUser(newUser, () => {
+          this.props.app.newsFeed();
+        });
       },
       error: (err) => {
         console.log(err);

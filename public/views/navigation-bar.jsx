@@ -24,7 +24,6 @@ var NavigationBarView = React.createClass({
 
   logout() {
     $.post('/logout', () => {
-      this.props.app.user = null;
       this.props.app.login();
     });
   },

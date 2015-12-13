@@ -7,10 +7,10 @@ var UserProfileInfoView = require('./user-profile-info.jsx');
 
 var UserProfileView = React.createClass({
   propTypes: {
-    appStore: React.PropTypes.object,
     app: React.PropTypes.object.isRequired,
-    profileOwner: React.PropTypes.object,
     user: React.PropTypes.object.isRequired,
+    appStore: React.PropTypes.object,
+    profileOwner: React.PropTypes.object,
     lazyLoadWithUserId: React.PropTypes.string,
     tabKey: React.PropTypes.number
   },
@@ -59,6 +59,7 @@ var UserProfileView = React.createClass({
             <Tab eventKey={2} title='About'>
               <br/>
               <UserProfileInfoView
+                app={this.props.app}
                 appStore={this.props.appStore}
                 user={this.props.user}
                 profileOwner={this.props.profileOwner}/>
