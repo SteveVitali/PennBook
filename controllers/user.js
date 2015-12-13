@@ -40,7 +40,8 @@ exports.signup = function(req, res) {
     gender: req.body.gender,
     createdAt: new Date(),
     isLoggedIn: true,
-    passwordHash: passwordHash.generate(req.body.password)
+    passwordHash: passwordHash.generate(req.body.password),
+    fullName: [req.body.firstName, req.body.lastName].join(' ')
   };
 
   var valid = _.reduce(_.keys(newUser), function(memo, key) {

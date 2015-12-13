@@ -20,6 +20,11 @@ exports.update = function(req, res) {
   }
   // Emptystring's will throw a validation error for string sets
   req.body.interests = _.compact(req.body.interests);
+  // And vogels makes you literally delete it from the object
+  // if it's empty because it can't handle empty arrays...
+  if (req.body.interests.length === 0) {
+    delete req.body.interests;
+  }
 
   User.update(req.body, function(err, updatedUser) {
     if (err) return onErr(err, res);
