@@ -42,7 +42,8 @@ var NewsFeedView = React.createClass({
           </Col>
           <Col md={8}>
             <PostStatusFormView app={this.props.app}
-              user={this.props.user}
+              statusPoster={this.props.user}
+              statusRecipient={this.props.user}
               appStore={this.props.appStore}/>
           </Col>
           <Col md={2}>

@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
+var Loader = require('react-loader');
 var NavigationBarView = require('./navigation-bar.jsx');
 var UserProfileInfoView = require('./user-profile-info.jsx');
 var PostStatusFormView = require('./post-status-form.jsx');
@@ -12,7 +13,7 @@ var UserProfileView = React.createClass({
     user: React.PropTypes.object.isRequired,
     appStore: React.PropTypes.object,
     profileOwner: React.PropTypes.object,
-    lazyLoadWithUserId: React.PropTypes.string,
+    profileOwnerId: React.PropTypes.string,
     tabKey: React.PropTypes.number
   },
 
@@ -24,14 +25,15 @@ var UserProfileView = React.createClass({
 
   getInitialState() {
     return {
-      tabKey: this.props.tabKey || 1
+      tabKey: this.props.tabKey || 1,
+      profileOwner: this.props.profileOwner
     };
   },
 
   componentWillReceiveProps(nextProps) {
-    console.log('receiving dem props');
     this.setState({
-      tabKey: nextProps.tabKey
+      tabKey: nextProps.tabKey,
+      profileOwner: nextProps.profileOwner
     });
   },
 
@@ -44,33 +46,48 @@ var UserProfileView = React.createClass({
     });
   },
 
+  lazyLoadUser: function() {
+    if (this.state.profileOwner) return true;
+
+    var userId = this.props.profileOwnerId;
+    this.props.appStore.fetch([userId], 'Users', () => {
+      this.setState({
+        profileOwner: this.props.appStore.getModel(userId, 'Users')
+      });
+    });
+  },
+
   render() {
     var Tabs = ReactBootstrap.Tabs;
     var Tab = ReactBootstrap.Tab;
+
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
         <div className='container'>
-          <Tabs activeKey={this.state.tabKey}
-            animation={false}
-            onSelect={this.handleSelectTab}>
-            <Tab eventKey={1} title='Timeline'>
-              <PostStatusFormView app={this.props.app}
-                user={this.props.user}
-                appStore={this.props.appStore}/>
-            </Tab>
-            <Tab eventKey={2} title='About'>
-              <br/>
-              <UserProfileInfoView
-                app={this.props.app}
-                appStore={this.props.appStore}
-                user={this.props.user}
-                profileOwner={this.props.profileOwner}/>
-            </Tab>
-            <Tab eventKey={3} title='Friends'>
-              Friends
-            </Tab>
-          </Tabs>
+          <Loader loaded={this.lazyLoadUser()}>
+            <Tabs activeKey={this.state.tabKey}
+              animation={false}
+              onSelect={this.handleSelectTab}>
+              <Tab eventKey={1} title='Timeline'>
+                <PostStatusFormView app={this.props.app}
+                  statusPoster={this.props.user}
+                  statusRecipient={this.state.profileOwner}
+                  appStore={this.props.appStore}/>
+              </Tab>
+              <Tab eventKey={2} title='About'>
+                <br/>
+                <UserProfileInfoView
+                  app={this.props.app}
+                  appStore={this.props.appStore}
+                  user={this.props.user}
+                  profileOwner={this.state.profileOwner}/>
+              </Tab>
+              <Tab eventKey={3} title='Friends'>
+                Friends
+              </Tab>
+            </Tabs>
+          </Loader>
         </div>
       </span>
     );

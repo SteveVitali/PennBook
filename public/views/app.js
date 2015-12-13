@@ -75,9 +75,7 @@ var App = Backbone.View.extend({
   },
 
   viewProfileById(id) {
-    // Same as viewProfile, but asynchronously
-    // load the user and show a loading spinner
-    // in the UserProfileView while waiting
+    this.viewProfile(null, { profileOwnerId: id });
   },
 
   render() {
@@ -116,6 +114,7 @@ var Router = Backbone.Router.extend({
 
   viewProfileById(id) {
     // Need to figure out how to optionally lazy load.
+    this.app.viewProfileById(id);
   },
 
   viewOwnProfile() {
