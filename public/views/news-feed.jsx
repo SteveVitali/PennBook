@@ -3,6 +3,7 @@ var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var NavigationBarView = require('./navigation-bar.jsx');
+var PostStatusFormView = require('./post-status-form.jsx');
 
 var NewsFeedView = React.createClass({
   propTypes: {
@@ -40,13 +41,9 @@ var NewsFeedView = React.createClass({
             <a href='/#profile/edit'>Edit Profile</a>
           </Col>
           <Col md={8}>
-            <Panel header='Update Status'>
-              <Input type='textarea' placeholder="What's on your mind?"
-                onChange={(e) => {
-                  this.setState({ status: e.target.value });
-              }}/>
-              <Button onClick={this.postStatus}>Post</Button>
-            </Panel>
+            <PostStatusFormView app={this.props.app}
+              user={this.props.user}
+              appStore={this.props.appStore}/>
           </Col>
           <Col md={2}>
             Online Friends

@@ -4,6 +4,7 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var NavigationBarView = require('./navigation-bar.jsx');
 var UserProfileInfoView = require('./user-profile-info.jsx');
+var PostStatusFormView = require('./post-status-form.jsx');
 
 var UserProfileView = React.createClass({
   propTypes: {
@@ -54,7 +55,9 @@ var UserProfileView = React.createClass({
             animation={false}
             onSelect={this.handleSelectTab}>
             <Tab eventKey={1} title='Timeline'>
-              Timeline
+              <PostStatusFormView app={this.props.app}
+                user={this.props.user}
+                appStore={this.props.appStore}/>
             </Tab>
             <Tab eventKey={2} title='About'>
               <br/>
