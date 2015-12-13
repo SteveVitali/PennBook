@@ -38,15 +38,17 @@ var UserProfileView = React.createClass({
   },
 
   handleSelectTab(key) {
-    this.props.app.router.navigate(
-      key === 2 ? '/profile/edit' : '/profile'
-    );
+    if (this.isOwnProfile()) {
+      this.props.app.router.navigate(
+        key === 2 ? '/profile/edit' : '/profile'
+      );
+    }
     this.setState({
       tabKey: key
     });
   },
 
-  lazyLoadUser: function() {
+  lazyLoadUser() {
     if (this.state.profileOwner) return true;
 
     var userId = this.props.profileOwnerId;
@@ -55,6 +57,11 @@ var UserProfileView = React.createClass({
         profileOwner: this.props.appStore.getModel(userId, 'Users')
       });
     });
+  },
+
+  isOwnProfile() {
+    return this.state.profileOwner &&
+           this.props.app.user._id === this.state.profileOwner._id;
   },
 
   render() {

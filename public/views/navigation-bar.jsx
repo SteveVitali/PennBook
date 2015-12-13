@@ -31,6 +31,10 @@ var NavigationBarView = React.createClass({
 
   selectUserFromSearchOptions(data) {
     console.log('selected', data, 'from search options');
+    this.props.app.router.navigate(
+      '/profile/id/' + data._id,
+      { trigger: true }
+    );
   },
 
   render() {
