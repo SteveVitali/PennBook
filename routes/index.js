@@ -28,6 +28,7 @@ module.exports = function(app) {
   app.post('/login', user.login);
   app.post('/logout', user.logout);
   app.post('/signup', user.signup);
+  app.get('/users/regex-search/:search', user.regexSearch);
 
   app.get('/request-friend/:email', loggedIn, friend.request);
   app.get('/confirm-friend/:email', loggedIn, friend.confirmRequest);

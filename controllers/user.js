@@ -62,3 +62,18 @@ exports.signup = function(req, res) {
     });
   });
 };
+
+exports.regexSearch = function(req, res) {
+  var search = req.params.search;
+  User.regexSearchByName(search, function(err, users) {
+    if (err) return onErr(err, res);
+    var processedResults = _.map(users, function(user) {
+      return {
+        value: user.fullName,
+        label: user.fullName,
+        data: _.omit(user, 'passwordHash')
+      };
+    });
+    res.send(processedResults);
+  });
+};

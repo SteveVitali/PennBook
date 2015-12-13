@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
+var AutoCompleteInput = require('./auto-complete-input.jsx');
 
 var NavigationBarView = React.createClass({
   propTypes: {
@@ -28,6 +29,10 @@ var NavigationBarView = React.createClass({
     });
   },
 
+  selectUserFromSearchOptions(data) {
+    console.log('selected', data, 'from search options');
+  },
+
   render() {
     var Input = ReactBootstrap.Input;
     var NavDropdown = ReactBootstrap.NavDropdown;
@@ -51,17 +56,18 @@ var NavigationBarView = React.createClass({
           </div>
           <div id='navbar' className='navbar-collapse collapse'>
             <form className='navbar-form navbar-left'>
-              <div className='form-group'>
-                <Input type='text' placeholder='Search'
-                  onChange={(e) => {
-                    this.setState({ searchTerm: e.target.value });
-                  }}
-                  onKeyPress={(e) => {
-                    if (event.keyCode === 13) {
-                      this.search(this.state.searchTerm);
-                    }
-                }}/>
-              </div>
+              <AutoCompleteInput
+                endpoint='/users/regex-search'
+                placeholder='Search'
+                onUpdate={this.selectUserFromSearchOptions}
+                onChange={(e) => {
+                  this.setState({ searchTerm: e.target.value });
+                }}
+                onKeyPress={(e) => {
+                  if (event.keyCode === 13) {
+                    this.search(this.state.searchTerm);
+                  }
+              }}/>
             </form>
             <ul className='nav navbar-nav navbar-right'>
               <NavDropdown title='Settings'>

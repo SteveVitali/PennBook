@@ -8,6 +8,7 @@ module.exports = function(vogels, Joi, CRUD) {
     schema: {
       _id: vogels.types.uuid(),
       email: Joi.string().email(),
+      fullName: Joi.string(),
       passwordHash: Joi.string(),
       firstName: Joi.string(),
       lastName: Joi.string(),
@@ -27,6 +28,11 @@ module.exports = function(vogels, Joi, CRUD) {
       { hashKey: 'email',
         rangeKey: 'lastName',
         name: 'EmailIndex',
+        type: 'global'
+      },
+      { hashKey: 'firstName',
+        rangeKey: 'lastName',
+        name: 'NameIndex',
         type: 'global'
       },
       { hashKey: 'school',
@@ -73,7 +79,23 @@ module.exports = function(vogels, Joi, CRUD) {
 
     // updatedUser must contain _id
     update: function(updatedUser, params, callback) {
+      // Pre-process by making sure fullName is updated
+      updatedUser.fullName = _.compact([
+        updatedUser.firstName,
+        updatedUser.lastName
+      ]).join(' ');
+
       CRUD.update(updatedUser, params, callback);
+    },
+
+    regexSearchByName: function(name, callback) {
+      User.scan()
+      .limit(100)
+      .where('fullName')
+      .contains(name)
+      .exec(function(err, result) {
+        callback(err, _.pluck(result.Items, 'attrs'));
+      });
     }
   };
 };
