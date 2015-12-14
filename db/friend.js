@@ -1,4 +1,4 @@
-module.exports = function(vogels, Joi) {
+module.exports = function(vogels, Joi, CRUD) {
   // We store for each friendship, two rows in the KVS.
   // This makes it easy to query for all friends of a user
   // without having to store every friend in one huge StringSet.
@@ -7,8 +7,8 @@ module.exports = function(vogels, Joi) {
     hashKey: 'ownerId',
     rangeKey: 'dateFriended',
     schema: {
-      ownerId: vogels.types.uuid(),
-      friendId: vogels.types.uuid(),
+      ownerId: Joi.string(),
+      friendId: Joi.string(),
       dateFriended: Joi.date()
     },
     indexes: [
@@ -22,9 +22,16 @@ module.exports = function(vogels, Joi) {
 
   Friend.config({ tableName: 'friends' });
 
+	// Initialize CRUD helpers
+  CRUD = CRUD(Friend);
+	
   return {
     model: Friend,
-    tableName: 'friends'
+    tableName: 'friends',
+		
     // Additional functions here
+		create: function(friend, params, callback) {
+      CRUD.create(friend, params, callback);
+    }
   };
 };
