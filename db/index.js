@@ -14,7 +14,7 @@ var CRUD = function(model) {
         callback(err, model && model.attrs);
       });
     },
-
+		
     create: function(modelObj, params, callback) {
       // Make params argument optional
       if (_.isFunction(params)) {
@@ -22,6 +22,18 @@ var CRUD = function(model) {
         params = null;
       }
       modelObj._id = uuid.v4();
+      model.create(modelObj, params || {}, function(err, modelData) {
+        callback(err, modelData && modelData.attrs);
+      });
+    },
+		
+    createFriend: function(modelObj, params, callback) {
+      // Make params argument optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = null;
+      }
+
       model.create(modelObj, params || {}, function(err, modelData) {
         callback(err, modelData && modelData.attrs);
       });
