@@ -1,12 +1,15 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var React = require('react');
+var async = require('async');
 var AppStore = require('react-backbone-app-store');
 var Backbone = require('backbone');
 var LoginView = require('./login.jsx');
 var NewsFeedView = require('./news-feed.jsx');
 var UserProfileView = require('./user-profile.jsx');
 var models = require('../models');
+var UsersCollection = models.User.collection;
+var FriendshipsCollection = models.Friendship.collection;
 
 var App = Backbone.View.extend({
   el: '#app',
@@ -20,9 +23,10 @@ var App = Backbone.View.extend({
     this.appStore = new AppStore();
 
     this.appStore.registerModel(
-      'Users',
-      models.User.collection,
-      '/api/users'
+      'Users', UsersCollection, '/api/users'
+    );
+    this.appStore.registerModel(
+      'Friendships', FriendshipsCollection, '/api/friendships'
     );
   },
 
@@ -31,27 +35,66 @@ var App = Backbone.View.extend({
     var userId = user._id;
     var cachedUser = this.appStore.getModel(userId, 'Users');
     if (!cachedUser) {
-      console.log('Caching current user in app store');
-      // Make sure the user is cached in appStore.Users
-      this.appStore.fetch([userId], 'Users', () => {
-        // Store the user data from the app store
-        this.user = this.appStore.getModel(user._id, 'Users');
-
-        // Remove the user from the rootProps and add him back
-        this.rootProps.Users = _.reject(
-          this.rootProps.Users,
-          function(u) {
-            return u._id === userId;
-          }
-        );
-        this.rootProps.Users.push(this.user);
-
-        done && done();
-      });
+      this.initializeLoggedInUserData(userId, done);
     } else {
       this.user = cachedUser;
       done && done();
     }
+  },
+
+  initializeLoggedInUserData(userId, done) {
+    console.log('Caching current user in app store');
+    // Make sure the user is cached in appStore.Users
+    this.appStore.fetch([userId], 'Users', () => {
+      // Store the user data from the app store
+      this.user = this.appStore.getModel(userId, 'Users');
+
+      // Remove the user from the rootProps and add him back
+      this.rootProps.Users = _.reject(
+        this.rootProps.Users,
+        function(u) { return u._id === userId; }
+      );
+      this.rootProps.Users.push(this.user);
+
+      done && done();
+    });
+    // The above async stuff will finish, and when the callback
+    // is called, presumably the app should be getting rendered.
+    //
+    // In the mean time, we want to start fetching the multitude
+    // of data that the application will need access to later on
+    // in the lifecycle of the application.
+    //
+    // First, let's populate the user's friends list
+    this.initializeFriendsList(userId, done);
+  },
+
+  initializeFriendsList(userId, done) {
+    $.get('/api/users/' + userId + '/friendships', (friendships) => {
+      // Reset the list of friends stored in AppStore model hash
+      this.appStore.resetModelHash({
+        Friendships: friendships
+      });
+      // Use a map to quickly extract a list of unique user Id's
+      var idsMap = {};
+      _.each(friendships, (friendship) => {
+        idsMap[friendship.friendId] = true;
+        idsMap[friendship.ownerId] = true;
+      });
+      // Asynchronously fetch and cache all users
+      async.each(_.keys(idsMap), (id, next) => {
+        // If user already cached, don't re-fetch
+        if (this.appStore.getModel(id, 'Users')) {
+          return async.nextTick(next);
+        }
+        // Else, fetch the user data from the JSON API
+        this.appStore.fetch([id], 'Users', next);
+      },
+      (err) => {
+        err && console.log(err);
+        console.log(this.appStore.modelHash);
+      });
+    });
   },
 
   login() {
@@ -118,7 +161,6 @@ var Router = Backbone.Router.extend({
   },
 
   viewOwnProfile() {
-    console.log('view own');
     this.app.viewProfile(this.app.user, { tabKey: 1 });
   },
 
