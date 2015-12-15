@@ -1,8 +1,8 @@
 module.exports = function(vogels, Joi, CRUD) {
 
   var Status = vogels.define('Status', {
-    hashKey: 'recipientId',
-    rangeKey: '_id',
+    hashKey: '_id',
+    rangeKey: 'datePosted',
     schema: {
       _id: vogels.types.uuid(),
       posterId: Joi.string(),
@@ -14,13 +14,12 @@ module.exports = function(vogels, Joi, CRUD) {
       likes: vogels.types.stringSet() // of liker id's
     },
     indexes: [
-      // Example of a local index (different hashKey)
-      { hashKey: 'recipientId',
-        rangeKey: 'datePosted',
-        name: 'DatePostedIndex',
-        type: 'local'
-      },
       { hashKey: 'posterId',
+        rangeKey: 'datePosted',
+        name: 'PosterIdIndex',
+        type: 'global'
+      },
+      { hashKey: 'recipientId',
         rangeKey: 'datePosted',
         name: 'RecipientIdIndex',
         type: 'global'

@@ -41,7 +41,7 @@ module.exports = function(vogels, Joi, CRUD) {
       },
       { hashKey: 'work',
         rangeKey: 'lastName',
-        name: 'SchoolIndex',
+        name: 'WorkIndex',
         type: 'global'
       }
     ]
@@ -90,8 +90,7 @@ module.exports = function(vogels, Joi, CRUD) {
     regexSearchByName: function(name, callback) {
       User.scan()
       .limit(100)
-      .where('fullName')
-      .contains(name)
+      .where('fullName').contains(name)
       .exec(function(err, result) {
         callback(err, _.pluck(result.Items, 'attrs'));
       });

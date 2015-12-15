@@ -6,7 +6,7 @@ module.exports = function(vogels, Joi, CRUD) {
   // without having to store every friend in one huge StringSet.
   // (I'm open to a better design but this is the best I could come up with)
   var Friendship = vogels.define('Friendship', {
-    hashKey: 'ownerId',
+    hashKey: '_id',
     rangeKey: 'dateFriended',
     schema: {
       _id: vogels.types.uuid(),
@@ -15,6 +15,11 @@ module.exports = function(vogels, Joi, CRUD) {
       dateFriended: Joi.date()
     },
     indexes: [
+      { hashKey: 'ownerId',
+        rangeKey: 'dateFriended',
+        name: 'OwnerIdIndex',
+        type: 'global'
+      },
       { hashKey: 'friendId',
         rangeKey: 'dateFriended',
         name: 'FriendIdIndex',
@@ -40,6 +45,7 @@ module.exports = function(vogels, Joi, CRUD) {
     getFriendshipsOfUser: function(userId, callback) {
       Friendship
       .query(userId)
+      .usingIndex('OwnerIdIndex')
       .exec(function(err, friendships) {
         if (err) return callback(err);
         Friendship
