@@ -7,7 +7,7 @@ module.exports = {
   Action: require('./action'),
   Comment: require('./comment'),
   FriendRequest: require('./friend-request'),
-  Friend: require('./friend'),
+  Friendship: require('./friendship'),
   Status: require('./status'),
   User: require('./user')
 };

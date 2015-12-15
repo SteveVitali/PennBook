@@ -40,7 +40,7 @@ var CRUD = function(model) {
 
 var User = require('./user')(vogels, Joi, CRUD);
 var Comment = require('./comment')(vogels, Joi, CRUD);
-var Friend = require('./friend')(vogels, Joi, CRUD);
+var Friendship = require('./friendship')(vogels, Joi, CRUD);
 var FriendRequest = require('./friend-request')(vogels, Joi, CRUD);
 var Action = require('./action')(vogels, Joi, CRUD);
 var Status = require('./status')(vogels, Joi, CRUD);
@@ -49,7 +49,7 @@ module.exports = {
   User: User,
   Status: Status,
   Comment: Comment,
-  Friend: Friend,
+  Friendship: Friendship,
   Action: Action,
   FriendRequest: FriendRequest
 };

@@ -10,17 +10,17 @@ models.User.getAllKeys(function(err, data) {
     var f1 = data[_.random(data.length - 1)]._id;
     var f2 = data[_.random(data.length - 1)]._id;
     var f3 = data[_.random(data.length - 1)]._id;
-    models.Friend.create({
+    models.Friendship.create({
       ownerId: _id,
       friendId: f1,
       dateFriended: new Date()
     }, function() {
-      models.Friend.create({
+      models.Friendship.create({
         ownerId: _id,
         friendId: f2,
         dateFriended: new Date()
       }, function() {
-        models.Friend.create({
+        models.Friendship.create({
           ownerId: _id,
           friendId: f3,
           dateFriended: new Date()
