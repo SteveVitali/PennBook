@@ -97,14 +97,14 @@ module.exports = function(vogels, Joi, CRUD) {
         callback(err, _.pluck(result.Items, 'attrs'));
       });
     },
-	
-		getAllKeys: function(callback) {
-			User.scan()
-			.attributes(['_id'])
-			.loadAll()
-			.exec(function(err, data) {
-				callback(err, _.pluck(data.Items, 'attrs'));
-			});
-		}
+
+    getAllKeys: function(callback) {
+      User.scan()
+      .attributes(['_id'])
+      .loadAll()
+      .exec(function(err, data) {
+        callback(err, _.pluck(data.Items, 'attrs'));
+      });
+    }
   };
 };

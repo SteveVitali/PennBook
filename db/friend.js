@@ -7,6 +7,7 @@ module.exports = function(vogels, Joi, CRUD) {
     hashKey: 'ownerId',
     rangeKey: 'dateFriended',
     schema: {
+      _id: vogels.types.uuid(),
       ownerId: Joi.string(),
       friendId: Joi.string(),
       dateFriended: Joi.date()
@@ -22,15 +23,15 @@ module.exports = function(vogels, Joi, CRUD) {
 
   Friend.config({ tableName: 'friends' });
 
-	// Initialize CRUD helpers
+  // Initialize CRUD helpers
   CRUD = CRUD(Friend);
-	
+
   return {
     model: Friend,
     tableName: 'friends',
-		
+
     // Additional functions here
-		create: function(friend, params, callback) {
+    create: function(friend, params, callback) {
       CRUD.createFriend(friend, params, callback);
     }
   };

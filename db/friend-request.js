@@ -6,8 +6,9 @@ module.exports = function(vogels, Joi) {
     hashKey: 'requesteeId',
     rangeKey: 'requesterId',
     schema: {
-      requesteeId: vogels.types.uuid(),
-      requesterId: vogels.types.uuid()
+      _id: vogels.types.uuid(),
+      requesteeId: Joi.string(),
+      requesterId: Joi.string()
     },
     indexes: [
       { hashKey: 'requesterId',

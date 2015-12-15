@@ -8,7 +8,8 @@ module.exports = function(vogels, Joi) {
     hashKey: 'actorId',
     rangeKey: 'datetime',
     schema: {
-      actorId: vogels.types.uuid(),
+      _id: vogels.types.uuid(),
+      actorId: Joi.string(),
       datetime: Joi.date(),
       actionData: Joi.string() // arbitrary stringified JSON data
     }
