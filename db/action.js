@@ -14,7 +14,8 @@ module.exports = function(vogels, Joi, CRUD) {
       actorId: Joi.string(), // Id of user who created the action
       recipientId: Joi.string(), // Id of the 'recipient' of the action
       datetime: Joi.date(),
-      actionData: Joi.string() // arbitrary stringified JSON data
+      actionType: Joi.string(), // e.g. 'Status' or 'Friendship'
+      actionId: Joi.string() // e.g. a Status._id if actionType is 'Status'
     },
     indexes: [
       { hashKey: 'actorId',
@@ -37,6 +38,11 @@ module.exports = function(vogels, Joi, CRUD) {
   return {
     model: Action,
     tableName: 'actions',
+
+    create: function(friendship, params, callback) {
+      CRUD.create(friendship, params, callback);
+    },
+
     // Additional Action functions here
     getUserNewsFeed: function(userId, callback) {
       Action
