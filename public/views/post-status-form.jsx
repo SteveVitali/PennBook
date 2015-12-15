@@ -31,7 +31,9 @@ var PostStatusFormView = React.createClass({
         recipientId: this.props.statusRecipient._id
       },
       success: (status) => {
-        console.log('New status posted', status);
+        this.props.appStore.fetch([status._id], 'Statuses', () => {
+          this.props.app.render();
+        });
       },
       error: (err) => {
         console.log(err);

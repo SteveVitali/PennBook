@@ -8,9 +8,6 @@ var LoginView = require('./login.jsx');
 var NewsFeedView = require('./news-feed.jsx');
 var UserProfileView = require('./user-profile.jsx');
 var models = require('../models');
-var UsersCollection = models.User.collection;
-var FriendshipsCollection = models.Friendship.collection;
-var ActionsCollection = models.Action.collection;
 
 var App = Backbone.View.extend({
   el: '#app',
@@ -23,15 +20,27 @@ var App = Backbone.View.extend({
     };
     this.appStore = new AppStore();
 
-    this.appStore.registerModel(
-      'Users', UsersCollection, '/api/users'
-    );
-    this.appStore.registerModel(
-      'Friendships', FriendshipsCollection, '/api/friendships'
-    );
-    this.appStore.registerModel(
-      'Actions', ActionsCollection, '/api/actions'
-    );
+    // Helper for turning actionType values into collection names
+    this.pluralizeModel = (name) => {
+      return {
+        User: 'Users',
+        Friendship: 'Friendships',
+        Action: 'Actions',
+        Status: 'Statuses'
+      }[name];
+    };
+
+    var registerModel = (name, endpoint) => {
+      this.appStore.registerModel(
+        this.pluralizeModel(name),
+        models[name].collection,
+        endpoint
+      );
+    };
+    registerModel('User', '/api/users');
+    registerModel('Friendship', '/api/friendships');
+    registerModel('Action', '/api/actions');
+    registerModel('Status', '/api/statuses');
   },
 
   setUser(user, done) {
@@ -73,7 +82,10 @@ var App = Backbone.View.extend({
       (done) => { this.initializeNewsFeed(userId, done); }
     ], (err) => {
       err && console.log(err);
-      console.log('Finished loading all user data');
+      this.rootProps = _.extend(this.rootProps, {
+        Actions: this.appStore.getAll('Actions')
+      });
+      this.render();
     });
   },
 
@@ -100,7 +112,7 @@ var App = Backbone.View.extend({
       },
       (err) => {
         err && console.log(err);
-        console.log(this.appStore.modelHash);
+        done();
       });
     });
   },
@@ -111,8 +123,7 @@ var App = Backbone.View.extend({
       this.appStore.resetModelHash({
         Actions: actions
       });
-      console.log('loaded actions', actions);
-      // Now load all the data
+      done();
     });
   },
 
@@ -145,13 +156,15 @@ var App = Backbone.View.extend({
       this.router.navigate('/');
       this.rootComponent = LoginView;
     }
+    this.rootProps = _.extend(this.rootProps, {
+      app: this,
+      user: this.user
+    });
     console.log('rendering with user', this.user);
+    console.log('and rootProps', this.rootProps);
     // Render the React application
     this.appStore.resetData(
-      _.extend(this.rootProps, {
-        app: this,
-        user: this.user
-      }),
+      this.rootProps,
       this.rootComponent,
       this.el
     );

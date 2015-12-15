@@ -5,7 +5,6 @@ var async = require('async');
 var models = require('../db');
 
 var tableMetadata = {};
-
 _.each(models, function(model, name) {
   tableMetadata[model.tableName] = {
     readCapacity: 1,

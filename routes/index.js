@@ -40,6 +40,8 @@ module.exports = function(app) {
   app.get('/api/users/:id/friendships', loggedIn, api.User.getFriendships);
   app.get('/api/users/:id/news-feed', loggedIn, api.User.getNewsFeed);
 
+  app.get('/api/statuses/:id', loggedIn, api.Status.findById);
+
   app.post('/api/statuses', loggedIn, api.Status.post);
   // ...
 };
