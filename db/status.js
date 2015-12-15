@@ -37,6 +37,10 @@ module.exports = function(vogels, Joi, CRUD) {
     // Additional Status functions here
     create: function(status, params, callback) {
       CRUD.create(status, params, callback);
+    },
+
+    findById: function(id, callback) {
+      CRUD.findById(id, callback);
     }
   };
 };

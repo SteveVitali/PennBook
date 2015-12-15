@@ -47,7 +47,7 @@ module.exports = function(vogels, Joi, CRUD) {
     getUserNewsFeed: function(userId, callback) {
       Action
       .query(userId)
-      .usingIndex('RecipientIndex')
+      .usingIndex('RecipientIdIndex')
       .exec(function(err, result) {
         if (err) return callback(err);
         callback(err, _.pluck(result.Items, 'attrs'));

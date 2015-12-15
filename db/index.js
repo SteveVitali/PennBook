@@ -8,9 +8,9 @@ vogels.AWS.config.loadFromPath('credentials.json');
 var CRUD = function(model) {
   return {
     findById: function(id, callback) {
-      model.get(id, function(err, model) {
-        // The model object is stored in the 'attrs' field
-        callback(err, model && model.attrs);
+      model.query(id).exec(function(err, modelData) {
+        var results = _.pluck(modelData.Items, 'attrs');
+        callback(err, results[0]);
       });
     },
 

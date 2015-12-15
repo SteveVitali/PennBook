@@ -8,6 +8,13 @@ var onErr = function(err, res) {
   res.status(500).send(err);
 };
 
+exports.findById = function(req, res) {
+  Status.findById(req.params.id, function(err, status) {
+    if (err) return onErr(err, res);
+    res.send(status);
+  });
+};
+
 exports.post = function(req, res) {
   var status = req.body;
   if (!status.content) {

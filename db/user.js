@@ -4,6 +4,7 @@ module.exports = function(vogels, Joi, CRUD) {
 
   var User = vogels.define('User', {
     hashKey: '_id',
+    rangeKey: 'createdAt',
     schema: {
       _id: vogels.types.uuid(),
       email: Joi.string().email(),
@@ -23,7 +24,6 @@ module.exports = function(vogels, Joi, CRUD) {
       phoneNumber: Joi.string()
     },
     indexes: [
-      // Example of a global index (different hashKey)
       { hashKey: 'email',
         rangeKey: 'lastName',
         name: 'EmailIndex',
@@ -56,13 +56,11 @@ module.exports = function(vogels, Joi, CRUD) {
     model: User,
     tableName: 'users',
 
-    // Additional User functions here
     findById: function(id, callback) {
       CRUD.findById(id, callback);
     },
 
     findByEmail: function(email, callback) {
-      console.log('finding by email', email);
       User
       .query(email)
       .usingIndex('EmailIndex')

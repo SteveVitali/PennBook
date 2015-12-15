@@ -5,16 +5,16 @@ module.exports = function(vogels, Joi, CRUD) {
     rangeKey: 'datePosted',
     schema: {
       _id: vogels.types.uuid(),
-      statusId: Joi.string(), // = "Status.posterEmail + Status.statusId"
+      parentId: Joi.string(), // generic Id of parent object
       content: Joi.string(),
-      likes: vogels.types.stringSet(), // liker emails
+      likes: vogels.types.stringSet(), // liker _id's
       datePosted: Joi.date(),
       commenterId: Joi.string()
     },
     indexes: [
-      { hashKey: 'statusId',
+      { hashKey: 'parentId',
         rangeKey: 'datePosted',
-        name: 'StatusIdIndex',
+        name: 'ParentIdIndex',
         type: 'global'
       },
       { hashKey: 'commenterId',
