@@ -26,63 +26,59 @@ exports.post = function(req, res) {
     // Send success response back to user
     res.send(status);
 
-    var buildAction = function(recipientId) {
-      return {
-        actorId: posterId,
-        recipientId: recipientId,
-        datetime: new Date(),
-        actionType: 'Status',
-        actionId: status._id
-      };
-    };
-
-    var fetchRelevantFriendships = function(done) {
-      // First, fetch the poster's friendships
-      Friendship.getFriendshipsOfUser(posterId, function(err, friendships) {
-        if (posterId === recipientId) {
-          return done(err, friendships);
-        }
-        // If the poster is posting on someone else's wall, then
-        // get the friendships of the recipient, too
-        Friendship.getFriendshipsOfUser(
-          recipientId,
-          function(err, moreFriendships) {
-            // Send back poster and recipient friendships
-            done(err, friendships.concat(moreFriendships));
+    async.waterfall([
+      function fetchRelevantFriendships(done) {
+        // First, fetch the poster's friendships
+        Friendship.getFriendshipsOfUser(posterId, function(err, friendships) {
+          if (posterId === recipientId) {
+            return done(err, friendships);
           }
-        );
-      });
-    };
-
-    // Now, for all friends, post an Action to their news feed
-    fetchRelevantFriendships(function(err, friendships) {
-      if (err) return onErr(err, res);
-      // Adding this will ensure that an Action is posted to the
-      // news feed for the user who posted the status, too.
-      friendships.push({
-        ownerId: posterId,
-        friendId: posterId
-      });
-
-      var friendIdsMap = {};
-
-      async.each(friendships, function(friendship, next) {
-        // Get the id of the poster's friend
-        var friendId = friendship.ownerId === posterId
-          ? friendship.friendId
-          : friendship.ownerId;
-
-        // Don't post another action if the friend has been processed already
-        if (friendIdsMap[friendId]) {
-          return async.nextTick(next);
-        }
-        // Note that id has been processed and post the next action
-        friendIdsMap[friendId] = true;
-        Action.create(buildAction(friendId), next);
+          // If the poster is posting on someone else's wall, then
+          // get the friendships of the recipient, too
+          Friendship.getFriendshipsOfUser(
+            recipientId,
+            function(err, moreFriendships) {
+              // Send back poster and recipient friendships
+              done(err, friendships.concat(moreFriendships));
+            }
+          );
+        });
       },
-      function(err) {
-        if (err) return onErr(err, res);
-      });
+      function postActionsToFriends(friendships, done) {
+        // Adding this will ensure that an Action is posted to the
+        // news feed for the user who posted the status, too.
+        friendships.push({
+          ownerId: posterId,
+          friendId: posterId
+        });
+
+        var friendIdsMap = {};
+
+        async.each(friendships, function(friendship, next) {
+          // Get the id of the poster's friend
+          var friendId = friendship.ownerId === posterId
+            ? friendship.friendId
+            : friendship.ownerId;
+
+          // Don't post another action if the friend has been processed already
+          if (friendIdsMap[friendId]) {
+            return async.nextTick(next);
+          }
+          // Note that id has been processed and post the next action
+          friendIdsMap[friendId] = true;
+          Action.create({
+            actorId: posterId,
+            recipientId: friendId,
+            datetime: status.datePosted,
+            actionType: 'Status',
+            actionId: status._id
+          }, next);
+
+        }, done);
+      }
+    ],
+    function(err) {
+      if (err) return onErr(err, res);
     });
   });
 };
