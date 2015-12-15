@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var User = require('../../db').User;
 var Friendship = require('../../db').Friendship;
+var Action = require('../../db').Action;
 
 var onErr = function(err, res) {
   err && console.log(err);
@@ -41,5 +42,16 @@ exports.getFriendships = function(req, res) {
   Friendship.getFriendshipsOfUser(id, function(err, friendships) {
     if (err) return onErr(err, res);
     res.send(friendships);
+  });
+};
+
+exports.getNewsFeed = function(req, res) {
+  var id = req.params.id;
+  if (req.session.user._id !== id) {
+    return onErr('Unauthorized', res);
+  }
+  Action.getUserNewsFeed(id, function(err, actions) {
+    if (err) return onErr(err, res);
+    res.send(actions);
   });
 };

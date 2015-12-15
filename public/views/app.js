@@ -10,6 +10,7 @@ var UserProfileView = require('./user-profile.jsx');
 var models = require('../models');
 var UsersCollection = models.User.collection;
 var FriendshipsCollection = models.Friendship.collection;
+var ActionsCollection = models.Action.collection;
 
 var App = Backbone.View.extend({
   el: '#app',
@@ -27,6 +28,9 @@ var App = Backbone.View.extend({
     );
     this.appStore.registerModel(
       'Friendships', FriendshipsCollection, '/api/friendships'
+    );
+    this.appStore.registerModel(
+      'Actions', ActionsCollection, '/api/actions'
     );
   },
 
@@ -64,9 +68,13 @@ var App = Backbone.View.extend({
     // In the mean time, we want to start fetching the multitude
     // of data that the application will need access to later on
     // in the lifecycle of the application.
-    //
-    // First, let's populate the user's friends list
-    this.initializeFriendsList(userId, done);
+    async.parallel([
+      (done) => { this.initializeFriendsList(userId, done); },
+      (done) => { this.initializeNewsFeed(userId, done); }
+    ], (err) => {
+      err && console.log(err);
+      console.log('Finished loading all user data');
+    });
   },
 
   initializeFriendsList(userId, done) {
@@ -94,6 +102,17 @@ var App = Backbone.View.extend({
         err && console.log(err);
         console.log(this.appStore.modelHash);
       });
+    });
+  },
+
+  initializeNewsFeed(userId, done) {
+    $.get('/api/users/' + userId + '/news-feed', (actions) => {
+      // Reset Actions in AppStore
+      this.appStore.resetModelHash({
+        Actions: actions
+      });
+      console.log('loaded actions', actions);
+      // Now load all the data
     });
   },
 
