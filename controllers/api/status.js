@@ -14,8 +14,10 @@ exports.post = function(req, res) {
     return onErr('Status cannot be empty', res);
   }
   var posterId = req.session.user._id;
+  var recipientId = status.recipientId || status.posterId;
+
   status.posterId = posterId;
-  status.recipientId = status.recipientId || status.posterId;
+  status.recipientId = recipientId;
   status.datePosted = new Date();
   status.likes = [];
 
@@ -34,8 +36,26 @@ exports.post = function(req, res) {
       };
     };
 
+    var fetchRelevantFriendships = function(done) {
+      // First, fetch the poster's friendships
+      Friendship.getFriendshipsOfUser(posterId, function(err, friendships) {
+        if (posterId === recipientId) {
+          return done(err, friendships);
+        }
+        // If the poster is posting on someone else's wall, then
+        // get the friendships of the recipient, too
+        Friendship.getFriendshipsOfUser(
+          recipientId,
+          function(err, moreFriendships) {
+            // Send back poster and recipient friendships
+            done(err, friendships.concat(moreFriendships));
+          }
+        );
+      });
+    };
+
     // Now, for all friends, post an Action to their news feed
-    Friendship.getFriendshipsOfUser(posterId, function(err, friendships) {
+    fetchRelevantFriendships(function(err, friendships) {
       if (err) return onErr(err, res);
       // Adding this will ensure that an Action is posted to the
       // news feed for the user who posted the status, too.
@@ -44,12 +64,20 @@ exports.post = function(req, res) {
         friendId: posterId
       });
 
+      var friendIdsMap = {};
+
       async.each(friendships, function(friendship, next) {
         // Get the id of the poster's friend
         var friendId = friendship.ownerId === posterId
           ? friendship.friendId
           : friendship.ownerId;
 
+        // Don't post another action if the friend has been processed already
+        if (friendIdsMap[friendId]) {
+          return async.nextTick(next);
+        }
+        // Note that id has been processed and post the next action
+        friendIdsMap[friendId] = true;
         Action.create(buildAction(friendId), next);
       },
       function(err) {
