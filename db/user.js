@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var uuid = require('uuid');
 
 module.exports = function(vogels, Joi, CRUD) {
 

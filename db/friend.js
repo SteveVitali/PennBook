@@ -32,7 +32,7 @@ module.exports = function(vogels, Joi, CRUD) {
 
     // Additional functions here
     create: function(friend, params, callback) {
-      CRUD.createFriend(friend, params, callback);
+      CRUD.create(friend, params, callback);
     }
   };
 };
