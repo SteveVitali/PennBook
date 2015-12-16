@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 module.exports = function(vogels, Joi, CRUD) {
 
   var Comment = vogels.define('Comment', {
@@ -31,7 +33,16 @@ module.exports = function(vogels, Joi, CRUD) {
 
   return {
     model: Comment,
-    tableName: 'comments'
+    tableName: 'comments',
     // Additional Comment functions here
+    getCommentsOnItem: function(itemId, callback) {
+      Comment
+      .query(itemId)
+      .usingIndex('ParentIdIndex')
+      .exec(function(err, result) {
+        if (err) return callback(err);
+        callback(err, _.pluck(result.Items, 'attrs'));
+      });
+    }
   };
 };
