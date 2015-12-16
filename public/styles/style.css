@@ -2,6 +2,17 @@
   top: inherit !important;
 }
 
-#app {
-  background-color: #e9eaed
+html, #app {
+  background-color: #e9eaed;
+  height: 100%;
+}
+
+* {
+  -webkit-border-radius: 0 !important;
+     -moz-border-radius: 0 !important;
+          border-radius: 0 !important;
+}
+
+div.post-panel > div.panel-body {
+  margin-bottom: -38px;
 }
