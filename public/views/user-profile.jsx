@@ -6,6 +6,7 @@ var Loader = require('react-loader');
 var NavigationBarView = require('./navigation-bar.jsx');
 var UserProfileInfoView = require('./user-profile-info.jsx');
 var PostStatusFormView = require('./post-status-form.jsx');
+var NewsFeedItem = require('./news-feed-item.jsx');
 
 var UserProfileView = React.createClass({
   propTypes: {
@@ -24,9 +25,16 @@ var UserProfileView = React.createClass({
   },
 
   getInitialState() {
+    var initialOwner = this.props.profileOwner;
+    var initialOwnerId = this.props.profileOwnerId;
+    if (!initialOwner && initialOwnerId) {
+      // Get initial owner from cache if possible
+      initialOwner = this.props.appStore.get(initialOwnerId, 'Users');
+    }
     return {
       tabKey: this.props.tabKey || 1,
-      profileOwner: this.props.profileOwner
+      profileOwner: initialOwner,
+      actions: null
     };
   },
 
@@ -50,11 +58,22 @@ var UserProfileView = React.createClass({
 
   lazyLoadUser() {
     if (this.state.profileOwner) return true;
-
     var userId = this.props.profileOwnerId;
     this.props.appStore.fetch([userId], 'Users', () => {
       this.setState({
         profileOwner: this.props.appStore.getModel(userId, 'Users')
+      });
+    });
+  },
+
+  lazyLoadFeed() {
+    console.log('lazy load feed', this.state.actions);
+    if (!this.lazyLoadUser()) return false;
+    if (this.state.actions) return true;
+    var userId = this.state.profileOwner._id;
+    $.get('/api/users/' + userId + '/profile-feed', (actions) => {
+      this.setState({
+        actions: actions
       });
     });
   },
@@ -72,7 +91,7 @@ var UserProfileView = React.createClass({
       <span>
         <NavigationBarView app={this.props.app}/>
         <div className='container'>
-          <Loader loaded={this.lazyLoadUser()}>
+          <Loader loaded={this.lazyLoadFeed()}>
             <Tabs activeKey={this.state.tabKey}
               animation={false}
               onSelect={this.handleSelectTab}>
@@ -81,6 +100,13 @@ var UserProfileView = React.createClass({
                   statusPoster={this.props.user}
                   statusRecipient={this.state.profileOwner}
                   appStore={this.props.appStore}/>
+                { _.map(this.state.actions, (action, key) => {
+                  return (
+                    <NewsFeedItem action={action} key={key}
+                      app={this.props.app}
+                      appStore={this.props.appStore}/>
+                  );
+                })}
               </Tab>
               <Tab eventKey={2} title='About'>
                 <br/>

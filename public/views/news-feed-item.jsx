@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var Loader = require('react-loader');
+var StatusView = require('./status.jsx');
 
 var NewsFeedItem = React.createClass({
   propTypes: {
@@ -75,12 +76,25 @@ var NewsFeedItem = React.createClass({
     });
   },
 
+  getActionView() {
+    var actionType = (this.state.action || {}).actionType;
+    switch (actionType) {
+      case 'Status': return (
+        <StatusView app={this.props.app}
+          appStore={this.props.appStore}
+          status={this.state.item}/>
+      );
+      default: return null;
+    }
+  },
+
   render() {
     var Panel = ReactBootstrap.Panel;
+    var loaded = this.lazyLoadItem();
     return (
       <Panel>
-        <Loader loaded={this.lazyLoadItem()} scale={0.8}>
-          {JSON.stringify(this.state.item)}
+        <Loader loaded={loaded} scale={0.8}>
+          {this.getActionView()}
         </Loader>
       </Panel>
     );

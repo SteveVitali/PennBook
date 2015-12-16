@@ -160,8 +160,6 @@ var App = Backbone.View.extend({
       app: this,
       user: this.user
     });
-    console.log('rendering with user', this.user);
-    console.log('and rootProps', this.rootProps);
     // Render the React application
     this.appStore.resetData(
       this.rootProps,

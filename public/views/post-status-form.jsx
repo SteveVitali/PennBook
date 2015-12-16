@@ -31,6 +31,7 @@ var PostStatusFormView = React.createClass({
         recipientId: this.props.statusRecipient._id
       },
       success: (status) => {
+        // Cache the status in the app store and re-render
         this.props.appStore.fetch([status._id], 'Statuses', () => {
           this.setState({ status: '' }, () => {
             this.props.app.render();
@@ -47,11 +48,22 @@ var PostStatusFormView = React.createClass({
     var Panel = ReactBootstrap.Panel;
     var Input = ReactBootstrap.Input;
     var Button = ReactBootstrap.Button;
+
+    var poster = this.props.statusPoster;
+    var recipient = this.props.statusRecipient;
+
+    var header = 'Update Status';
+    var placeholder = "What's on your mind?";
+
+    if (poster._id !== recipient._id) {
+      header = 'Post';
+      placeholder = 'Write something...';
+    }
     return (
-      <Panel header='Update Status'>
+      <Panel header={header}>
         <Input type='textarea'
           value={this.state.status}
-          placeholder="What's on your mind?"
+          placeholder={placeholder}
           onChange={(e) => {
             this.setState({ status: e.target.value });
         }}/>
