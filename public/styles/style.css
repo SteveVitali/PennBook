@@ -1,3 +1,7 @@
 .spinner {
   top: inherit !important;
 }
+
+#app {
+  background-color: #e9eaed
+}

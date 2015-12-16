@@ -1,7 +1,9 @@
+var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var Loader = require('react-loader');
 var StatusView = require('./status.jsx');
+var CommentView = require('./comment.jsx');
 
 var NewsFeedItem = React.createClass({
   propTypes: {
@@ -76,6 +78,10 @@ var NewsFeedItem = React.createClass({
     });
   },
 
+  lazyLoadComments() {
+
+  },
+
   getActionView() {
     var actionType = (this.state.action || {}).actionType;
     switch (actionType) {
@@ -90,11 +96,32 @@ var NewsFeedItem = React.createClass({
 
   render() {
     var Panel = ReactBootstrap.Panel;
-    var loaded = this.lazyLoadItem();
+    var Table = ReactBootstrap.Table;
+
     return (
       <Panel>
-        <Loader loaded={loaded} scale={0.8}>
+        <Loader loaded={this.lazyLoadItem()} scale={0.8}>
           {this.getActionView()}
+        </Loader>
+
+        <Loader loaded={!this.lazyLoadComments()} scale={0.8}>
+          <br/>
+          <Table condensed>
+            <tbody>
+              { _.map(this.state.comments || ['a', 'b'], (comment) => {
+                return (
+                  <tr>
+                    <td>
+                      <CommentView comment={comment}
+                        parent={this.state.item}
+                        app={this.props.app}
+                        appStore={this.props.appStore}/>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
         </Loader>
       </Panel>
     );
