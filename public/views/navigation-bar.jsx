@@ -56,7 +56,7 @@ var NavigationBarView = React.createClass({
               <span className='icon-bar'></span>
               <span className='icon-bar'></span>
             </button>
-            <a className='navbar-brand' href='#'>Project name</a>
+            <a className='navbar-brand' href='#'>PennBook</a>
           </div>
           <div id='navbar' className='navbar-collapse collapse'>
             <form className='navbar-form navbar-left'>

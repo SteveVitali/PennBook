@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
@@ -18,7 +19,8 @@ var NewsFeedItem = React.createClass({
     action: React.PropTypes.object,
     actionId: React.PropTypes.string,
     item: React.PropTypes.object,
-    itemId: React.PropTypes.object
+    itemId: React.PropTypes.object,
+    comments: React.PropTypes.arrayOf(React.PropTypes.object)
   },
 
   getDefaultProps() {
@@ -43,8 +45,18 @@ var NewsFeedItem = React.createClass({
     }
     return {
       action: initialAction,
-      item: initialItem
+      item: initialItem,
+      comments: props.comments,
+      comment: ''
     };
+  },
+
+  itemType() {
+    return this.state.action && this.state.action.actionType;
+  },
+
+  pluralItemType() {
+    return this.props.app.pluralizeModel(this.itemType());
   },
 
   lazyLoadAction() {
@@ -65,9 +77,7 @@ var NewsFeedItem = React.createClass({
     if (this.state.item) return true;
 
     // Get plural form of action type
-    var itemType = this.props.app.pluralizeModel(
-      this.state.action.actionType
-    );
+    var itemType = this.pluralItemType();
 
     var itemId = this.state.action.actionId;
     var appStore = this.props.appStore;
@@ -79,7 +89,18 @@ var NewsFeedItem = React.createClass({
   },
 
   lazyLoadComments() {
+    if (this.state.comments) return true;
+    if (!this.state.item) return false;
 
+    var itemType = this.pluralItemType().toLowerCase();
+    var itemId = this.state.item._id;
+
+    $.get('/api/item/' + itemId + '/comments', (comments) => {
+      console.log('Fetched comments', comments);
+      this.setState({
+        comments: comments
+      });
+    });
   },
 
   getActionView() {
@@ -94,21 +115,25 @@ var NewsFeedItem = React.createClass({
     }
   },
 
+  postComment(comment) {
+    console.log('About to post comment', comment);
+  },
+
   render() {
     var Panel = ReactBootstrap.Panel;
     var Table = ReactBootstrap.Table;
-
+    var Input = ReactBootstrap.Input;
     return (
-      <Panel>
+      <Panel className='post-panel'>
         <Loader loaded={this.lazyLoadItem()} scale={0.8}>
           {this.getActionView()}
         </Loader>
 
-        <Loader loaded={!this.lazyLoadComments()} scale={0.8}>
+        <Loader loaded={this.lazyLoadComments()} scale={0.8}>
           <br/>
           <Table condensed>
             <tbody>
-              { _.map(this.state.comments || ['a', 'b'], (comment) => {
+              { _.map(this.state.comments, (comment) => {
                 return (
                   <tr>
                     <td>
@@ -120,6 +145,22 @@ var NewsFeedItem = React.createClass({
                   </tr>
                 );
               })}
+              <tr>
+                <td>
+                  <Input type='text' bsSize='small'
+                    placeholder='Write a comment...'
+                    value={this.state.value}
+                    onChange={(e) => {
+                      this.setState({ comment: e.target.value });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.keyCode === 13) {
+                        var comment = this.state.comment;
+                        comment && this.postComment(comment);
+                      }
+                    }}/>
+                </td>
+              </tr>
             </tbody>
           </Table>
         </Loader>
