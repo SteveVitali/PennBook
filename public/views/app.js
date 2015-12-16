@@ -182,11 +182,10 @@ var Router = Backbone.Router.extend({
   },
 
   home() {
-    this.app.user ? this.app.newsFeed() : this.app.login();
+    this.app.newsFeed();
   },
 
   viewProfileById(id) {
-    // Need to figure out how to optionally lazy load.
     this.app.viewProfileById(id);
   },
 

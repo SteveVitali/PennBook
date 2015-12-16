@@ -41,7 +41,8 @@ var UserProfileView = React.createClass({
   componentWillReceiveProps(nextProps) {
     this.setState({
       tabKey: nextProps.tabKey,
-      profileOwner: nextProps.profileOwner
+      profileOwner: nextProps.profileOwner,
+      actions: null
     });
   },
 
@@ -67,7 +68,6 @@ var UserProfileView = React.createClass({
   },
 
   lazyLoadFeed() {
-    console.log('lazy load feed', this.state.actions);
     if (!this.lazyLoadUser()) return false;
     if (this.state.actions) return true;
     var userId = this.state.profileOwner._id;
@@ -86,7 +86,6 @@ var UserProfileView = React.createClass({
   render() {
     var Tabs = ReactBootstrap.Tabs;
     var Tab = ReactBootstrap.Tab;
-
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
