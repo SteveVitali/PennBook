@@ -4,6 +4,7 @@ var router = express.Router();
 var api = require('../controllers/api');
 var user = require('../controllers/user');
 var friend = require('../controllers/friend');
+var vis = require('../controllers/visualize');
 
 var isLoggedIn = function(req) {
   return !!(req.session && req.session.user);
@@ -46,4 +47,9 @@ module.exports = function(app) {
 
   // Here '/item' refers to any type of data referred to by an Action
   app.get('/api/item/:id/comments', loggedIn, api.Comment.getCommentsOnItem);
+	
+	// Visualizer
+	app.get('/vis', loggedIn, vis.initPage);
+	app.get('/friendvisualization', loggedIn, vis.initUser);
+	app.get('/getFriends/:user', loggedIn, vis.fromUser);
 };

@@ -39,7 +39,21 @@ module.exports = function(vogels, Joi, CRUD) {
 
     // Additional functions here
     create: function(friendship, params, callback) {
-      CRUD.create(friendship, params, callback);
+			// Make sure to add the other edge of this friendship to the table.
+			var inverse = {
+				ownerId: friendship.friendId,
+				friendId: friendship.ownerId,
+				dateFriended: friendship.dateFriended
+			};
+			if (callback) {
+				CRUD.create(friendship, params, function(err, data) {
+					CRUD.create(inverse, params, callback);
+				});
+			} else {
+				CRUD.create(friendship, function(err, data) {
+					CRUD.create(inverse, params, callback);
+				});
+			}
     },
 
     getFriendshipsOfUser: function(userId, callback) {
