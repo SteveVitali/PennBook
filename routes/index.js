@@ -39,9 +39,8 @@ module.exports = function(app) {
   app.put('/api/users/:id', loggedIn, api.User.update);
   app.get('/api/users/:id/friendships', loggedIn, api.User.getFriendships);
   app.get('/api/users/:id/news-feed', loggedIn, api.User.getNewsFeed);
+  app.get('/api/users/:id/profile-feed', loggedIn, api.User.getProfileFeed);
 
   app.get('/api/statuses/:id', loggedIn, api.Status.findById);
-
   app.post('/api/statuses', loggedIn, api.Status.post);
-  // ...
 };

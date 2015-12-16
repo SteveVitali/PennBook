@@ -19,18 +19,21 @@ module.exports = function(vogels, Joi, CRUD) {
       actionId: Joi.string() // e.g. a Status._id if actionType is 'Status'
     },
     indexes: [
-      { hashKey: 'actorId',
-        rangeKey: 'datetime',
-        name: 'ActorIdIndex',
-        type: 'global'
-      },
+      // Fetch all subscribed actions in order
       { hashKey: 'subscriberId',
         rangeKey: 'datetime',
         name: 'SubscriberIdIndex',
         type: 'global'
       },
+      // Fetch all of a user's performed actions
+      { hashKey: 'actorId',
+        rangeKey: 'subscriberId',
+        name: 'ActorIdIndex',
+        type: 'global'
+      },
+      // Fetch all of a user's received actions
       { hashKey: 'recipientId',
-        rangeKey: 'datetime',
+        rangeKey: 'subscriberId',
         name: 'RecipientIdIndex',
         type: 'global'
       }
@@ -62,16 +65,31 @@ module.exports = function(vogels, Joi, CRUD) {
     getUserProfileFeed: function(userId, callback) {
       Action
       .query(userId)
+      .where('subscriberId').equals(userId)
       .usingIndex('ActorIdIndex')
       .exec(function(err, actionsDone) {
+        console.log('first err', !!err);
         if (err) return callback(err);
         Action
         .query(userId)
+        .where('subscriberId').equals(userId)
         .usingIndex('RecipientIdIndex')
         .exec(function(err, actionsReceived) {
           if (err) return callback(err);
-          var allResults = actionsDone.Items.concat(actionsReceived.Items);
-          res.send(_.pluck(allResults, 'attrs'));
+          var actions = _.pluck(
+            actionsDone.Items.concat(actionsReceived.Items), 'attrs'
+          );
+          // Now, we want to filter out any duplicates that we get
+          // (e.g. self-posts, which has actorId === subscriberId)
+          var itemIdsMap = {};
+          var uniqueActions = _.compact(_.map(actions, function(action) {
+            var actionId = action.actionId;
+            if (!itemIdsMap[actionId]) {
+              itemIdsMap[actionId] = true;
+              return action;
+            }
+          }));
+          callback(err, uniqueActions);
         });
       });
     }
