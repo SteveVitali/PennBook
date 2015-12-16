@@ -1,6 +1,4 @@
-//var _ = require('lodash');
-//var passwordHash = require('password-hash');
-//var User = require('../db').User;
+var models = require('../db');
 
 var onErr = function(err, res) {
   err && console.log(err);
@@ -12,6 +10,16 @@ exports.initPage = function(req, res) {
 }
 
 exports.initUser = function(req, res) {
+	console.log("Visualizing " + req.session.user._id + " " + req.session.user.fullName);
+	var userID = req.session.user._id;
+	models.Friendship.getFriendshipsOfUser(userID, function(err, data) {
+		if (err) {
+			console.log("Error: " + err);
+		}
+		
+		console.log(data);
+	});
+	
 	var json = {"id": "alice","name": "Alice","children": [{
 			"id": "bob",
 					"name": "Bob",

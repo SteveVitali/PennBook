@@ -49,7 +49,7 @@ module.exports = function(app) {
   app.get('/api/item/:id/comments', loggedIn, api.Comment.getCommentsOnItem);
 	
 	// Visualizer
-	app.get('/vis', vis.initPage);
-	app.get('/friendvisualization', vis.initUser);
-	app.get('/getFriends/:user', vis.fromUser);
+	app.get('/vis', loggedIn, vis.initPage);
+	app.get('/friendvisualization', loggedIn, vis.initUser);
+	app.get('/getFriends/:user', loggedIn, vis.fromUser);
 };
