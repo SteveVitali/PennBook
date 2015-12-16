@@ -58,5 +58,18 @@ async.each(names, function(name, next) {
 },
 function(err) {
   err && console.log(err);
-  console.log('Uploaded dummy data');
+	models.User.create({
+    email: 'test@test.com',
+    firstName: 'John',
+    lastName: 'Deer',
+    birthdate: new Date(),
+    gender: 'male',
+    createdAt: new Date(),
+    passwordHash: passwordHash.generate('ayy lmao'),
+    fullName: 'John Deer',
+    school: 'Odd man out',
+    interests: []
+  }, function() {
+		console.log('Uploaded dummy data');
+	});
 });

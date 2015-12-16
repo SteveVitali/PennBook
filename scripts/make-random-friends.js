@@ -4,7 +4,6 @@ var async = require('async');
 var models = require('../db');
 
 models.User.getAllKeys(function(err, data) {
-  //console.log(data);
   async.each(data, function(id, next) {
     var _id = id._id;
     var f1 = data[_.random(data.length - 1)]._id;
