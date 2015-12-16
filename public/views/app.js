@@ -56,7 +56,6 @@ var App = Backbone.View.extend({
   },
 
   initializeLoggedInUserData(userId, done) {
-    console.log('Caching current user in app store');
     // Make sure the user is cached in appStore.Users
     this.appStore.fetch([userId], 'Users', () => {
       // Store the user data from the app store
@@ -135,6 +134,7 @@ var App = Backbone.View.extend({
 
   newsFeed() {
     this.rootComponent = NewsFeedView;
+    this.rootProps.Actions = this.appStore.getAll('Actions');
     this.render();
   },
 
@@ -158,8 +158,11 @@ var App = Backbone.View.extend({
     }
     this.rootProps = _.extend(this.rootProps, {
       app: this,
-      user: this.user
+      user: this.user,
+      Actions: this.appStore.getAll('Actions')
     });
+    console.log(this.appStore);
+    console.log('actions', this.rootProps.Actions);
     // Render the React application
     this.appStore.resetData(
       this.rootProps,

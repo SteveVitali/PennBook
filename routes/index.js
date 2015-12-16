@@ -45,9 +45,11 @@ module.exports = function(app) {
   app.get('/api/statuses/:id', loggedIn, api.Status.findById);
   app.post('/api/statuses', loggedIn, api.Status.post);
 
+  app.post('/api/comments', loggedIn, api.Comment.post);
+
   // Here '/item' refers to any type of data referred to by an Action
   app.get('/api/item/:id/comments', loggedIn, api.Comment.getCommentsOnItem);
-	
+
 	// Visualizer
 	app.get('/vis', loggedIn, vis.initPage);
 	app.get('/friendvisualization', loggedIn, vis.initUser);

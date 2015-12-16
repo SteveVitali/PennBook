@@ -34,7 +34,7 @@ module.exports = function(vogels, Joi, CRUD) {
   return {
     model: Status,
     tableName: 'statuses',
-    // Additional Status functions here
+
     create: function(status, params, callback) {
       CRUD.create(status, params, callback);
     },

@@ -24,11 +24,6 @@ var NewsFeedView = React.createClass({
     };
   },
 
-  postStatus() {
-    console.log('Posting status', this.state.status);
-    // this.props.app.router.navigate('/profile/id/'')
-  },
-
   render() {
     var Row = ReactBootstrap.Row;
     var Col = ReactBootstrap.Col;
