@@ -43,6 +43,27 @@ var App = Backbone.View.extend({
     registerModel('Status', '/api/statuses');
   },
 
+  render() {
+    if (!this.user) {
+      this.router.navigate('/');
+      this.rootComponent = LoginView;
+    }
+    this.rootProps = _.extend(this.rootProps, {
+      app: this,
+      user: this.user,
+      Actions: this.appStore.getAll('Actions'),
+      Friendships: this.appStore.getAll('Friendships')
+    });
+    console.log(this.appStore);
+    console.log('actions', this.rootProps.Actions);
+    // Render the React application
+    this.appStore.resetData(
+      this.rootProps,
+      this.rootComponent,
+      this.el
+    );
+  },
+
   setUser(user, done) {
     if (!user) return done && done();
     var userId = user._id;
@@ -149,26 +170,6 @@ var App = Backbone.View.extend({
 
   viewProfileById(id) {
     this.viewProfile(null, { profileOwnerId: id });
-  },
-
-  render() {
-    if (!this.user) {
-      this.router.navigate('/');
-      this.rootComponent = LoginView;
-    }
-    this.rootProps = _.extend(this.rootProps, {
-      app: this,
-      user: this.user,
-      Actions: this.appStore.getAll('Actions')
-    });
-    console.log(this.appStore);
-    console.log('actions', this.rootProps.Actions);
-    // Render the React application
-    this.appStore.resetData(
-      this.rootProps,
-      this.rootComponent,
-      this.el
-    );
   }
 });
 
