@@ -12,7 +12,8 @@ module.exports = function(vogels, Joi, CRUD) {
     schema: {
       _id: vogels.types.uuid(),
       actorId: Joi.string(), // Id of user who created the action
-      recipientId: Joi.string(), // Id of the 'recipient' of the action
+      recipientId: Joi.string(), // Id of the 'recipient' of the action, if any
+      subscriberId: Joi.string(), // Id of the user who 'owns' this action
       datetime: Joi.date(),
       actionType: Joi.string(), // e.g. 'Status' or 'Friendship'
       actionId: Joi.string() // e.g. a Status._id if actionType is 'Status'
@@ -21,6 +22,11 @@ module.exports = function(vogels, Joi, CRUD) {
       { hashKey: 'actorId',
         rangeKey: 'datetime',
         name: 'ActorIdIndex',
+        type: 'global'
+      },
+      { hashKey: 'subscriberId',
+        rangeKey: 'datetime',
+        name: 'SubscriberIdIndex',
         type: 'global'
       },
       { hashKey: 'recipientId',
@@ -43,14 +49,30 @@ module.exports = function(vogels, Joi, CRUD) {
       CRUD.create(friendship, params, callback);
     },
 
-    // Additional Action functions here
     getUserNewsFeed: function(userId, callback) {
       Action
       .query(userId)
-      .usingIndex('RecipientIdIndex')
+      .usingIndex('SubscriberIdIndex')
       .exec(function(err, result) {
         if (err) return callback(err);
         callback(err, _.pluck(result.Items, 'attrs'));
+      });
+    },
+
+    getUserProfileFeed: function(userId, callback) {
+      Action
+      .query(userId)
+      .usingIndex('ActorIdIndex')
+      .exec(function(err, actionsDone) {
+        if (err) return callback(err);
+        Action
+        .query(userId)
+        .usingIndex('RecipientIdIndex')
+        .exec(function(err, actionsReceived) {
+          if (err) return callback(err);
+          var allResults = actionsDone.Items.concat(actionsReceived.Items);
+          res.send(_.pluck(allResults, 'attrs'));
+        });
       });
     }
   };

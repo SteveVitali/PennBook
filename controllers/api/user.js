@@ -55,3 +55,11 @@ exports.getNewsFeed = function(req, res) {
     res.send(actions);
   });
 };
+
+exports.getProfileFeed = function(req, res) {
+  var id = req.params.id;
+  Action.getUserProfileFeed(id, function(err, actions) {
+    if (err) return onErr(err, res);
+    res.send(actions);
+  });
+};

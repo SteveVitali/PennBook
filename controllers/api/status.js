@@ -74,8 +74,9 @@ exports.post = function(req, res) {
           // Note that id has been processed and post the next action
           friendIdsMap[friendId] = true;
           Action.create({
+            subscriberId: friendId,
             actorId: posterId,
-            recipientId: friendId,
+            recipientId: recipientId,
             datetime: status.datePosted,
             actionType: 'Status',
             actionId: status._id
