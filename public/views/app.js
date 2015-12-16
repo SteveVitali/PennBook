@@ -43,6 +43,27 @@ var App = Backbone.View.extend({
     registerModel('Status', '/api/statuses');
   },
 
+  render() {
+    if (!this.user) {
+      this.router.navigate('/');
+      this.rootComponent = LoginView;
+    }
+    this.rootProps = _.extend(this.rootProps, {
+      app: this,
+      user: this.user,
+      Actions: this.appStore.getAll('Actions'),
+      Friendships: this.appStore.getAll('Friendships')
+    });
+    console.log(this.appStore);
+    console.log('actions', this.rootProps.Actions);
+    // Render the React application
+    this.appStore.resetData(
+      this.rootProps,
+      this.rootComponent,
+      this.el
+    );
+  },
+
   setUser(user, done) {
     if (!user) return done && done();
     var userId = user._id;
@@ -56,7 +77,6 @@ var App = Backbone.View.extend({
   },
 
   initializeLoggedInUserData(userId, done) {
-    console.log('Caching current user in app store');
     // Make sure the user is cached in appStore.Users
     this.appStore.fetch([userId], 'Users', () => {
       // Store the user data from the app store
@@ -135,6 +155,7 @@ var App = Backbone.View.extend({
 
   newsFeed() {
     this.rootComponent = NewsFeedView;
+    this.rootProps.Actions = this.appStore.getAll('Actions');
     this.render();
   },
 
@@ -149,23 +170,6 @@ var App = Backbone.View.extend({
 
   viewProfileById(id) {
     this.viewProfile(null, { profileOwnerId: id });
-  },
-
-  render() {
-    if (!this.user) {
-      this.router.navigate('/');
-      this.rootComponent = LoginView;
-    }
-    this.rootProps = _.extend(this.rootProps, {
-      app: this,
-      user: this.user
-    });
-    // Render the React application
-    this.appStore.resetData(
-      this.rootProps,
-      this.rootComponent,
-      this.el
-    );
   }
 });
 
@@ -182,11 +186,10 @@ var Router = Backbone.Router.extend({
   },
 
   home() {
-    this.app.user ? this.app.newsFeed() : this.app.login();
+    this.app.newsFeed();
   },
 
   viewProfileById(id) {
-    // Need to figure out how to optionally lazy load.
     this.app.viewProfileById(id);
   },
 

@@ -96,7 +96,7 @@ var NewsFeedItem = React.createClass({
     var itemId = this.state.item._id;
 
     $.get('/api/item/' + itemId + '/comments', (comments) => {
-      console.log('Fetched comments', comments);
+      comments.length && console.log('Fetched comments', comments);
       this.setState({
         comments: comments
       });
@@ -116,7 +116,24 @@ var NewsFeedItem = React.createClass({
   },
 
   postComment(comment) {
-    console.log('About to post comment', comment);
+    $.ajax({
+      type: 'post',
+      url: '/api/comments',
+      data: {
+        parentId: this.state.item._id,
+        content: comment
+        // Other fields will be filled in on server
+      },
+      success: (comment) => {
+        console.log('created comment', comment);
+        this.setState({
+          comments: null
+        });
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
   },
 
   render() {

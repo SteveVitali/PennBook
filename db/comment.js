@@ -34,7 +34,11 @@ module.exports = function(vogels, Joi, CRUD) {
   return {
     model: Comment,
     tableName: 'comments',
-    // Additional Comment functions here
+
+    create: function(comment, params, callback) {
+      CRUD.create(comment, params, callback);
+    },
+
     getCommentsOnItem: function(itemId, callback) {
       Comment
       .query(itemId)

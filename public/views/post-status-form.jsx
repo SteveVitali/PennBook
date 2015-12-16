@@ -16,12 +16,16 @@ var PostStatusFormView = React.createClass({
 
   getInitialState() {
     return {
-      status: ''
+      status: '',
+      submitDisabled: false
     };
   },
 
   postStatus: function(e) {
     if (!this.state.status) return;
+    this.setState({
+      submitDisabled: true
+    });
     $.ajax({
       type: 'post',
       url: '/api/statuses',
@@ -33,9 +37,10 @@ var PostStatusFormView = React.createClass({
       success: (status) => {
         // Cache the status in the app store and re-render
         this.props.appStore.fetch([status._id], 'Statuses', () => {
-          this.setState({ status: '' }, () => {
-            this.props.app.render();
-          });
+          this.setState({
+            status: '',
+            submitDisabled: false
+          }, () => { this.props.app.render(); });
         });
       },
       error: (err) => {
@@ -67,7 +72,10 @@ var PostStatusFormView = React.createClass({
           onChange={(e) => {
             this.setState({ status: e.target.value });
         }}/>
-        <Button onClick={this.postStatus}>Post</Button>
+        <Button disabled={this.state.submitDisabled}
+          onClick={this.postStatus}>
+          Post
+        </Button>
       </Panel>
     );
   }

@@ -21,14 +21,22 @@ exports.login = function(req, res) {
     if (!passwordHash.verify(password, user.passwordHash)) {
       return onErr('Invalid password', res);
     }
-    req.session.user = user;
-    res.send(_.omit(user, 'passwordHash'));
+    user.isLoggedIn = true;
+    User.update(user, {}, function(err, user) {
+      if (err) return onErr(err, res);
+      req.session.user = user;
+      res.send(_.omit(user, 'passwordHash'));
+    });
   });
 };
 
 exports.logout = function(req, res) {
-  req.session.destroy();
-  res.redirect('/');
+  req.session.user.isLoggedIn = false;
+  User.update(req.session.user, {}, function(err, user) {
+    if (err) return onErr(err, res);
+    req.session.destroy();
+    res.redirect('/');
+  });
 };
 
 exports.signup = function(req, res) {

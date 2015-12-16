@@ -93,6 +93,8 @@ var UserProfileInfoView = React.createClass({
 
   getBasicInfo() {
     var user = this.props.profileOwner;
+    if (!user) return null;
+
     return (
       <div className='container'>
         { _.map(['Email', 'Gender', 'Birthdate'], function(field) {
@@ -114,6 +116,8 @@ var UserProfileInfoView = React.createClass({
 
   getWorkAndEducation() {
     var user = this.props.profileOwner;
+    if (!user) return null;
+
     return (
       <div className='container'>
         { _.map(['School', 'Work', 'Interests'], function(field) {
@@ -135,6 +139,8 @@ var UserProfileInfoView = React.createClass({
 
   getBasicInfoForm() {
     var user = this.props.profileOwner;
+    if (!user) return null;
+
     var birthdate = new Date(user.birthdate);
 
     return FormGenerator.create({
@@ -195,6 +201,7 @@ var UserProfileInfoView = React.createClass({
 
   getWorkAndEducationForm() {
     var user = this.props.profileOwner;
+    if (!user) return null;
     return FormGenerator.create({
       school: {
         type: String,

@@ -26,7 +26,6 @@ var StatusView = React.createClass({
 
   lazyLoadUsers() {
     if (this.state.poster && this.state.recipient) {
-      console.log('users are loaded for status');
       return true;
     }
     var posterId = this.props.status.posterId;
@@ -34,7 +33,6 @@ var StatusView = React.createClass({
     var appStore = this.props.appStore;
 
     appStore.fetch([posterId, recipientId], 'Users', () => {
-      console.log('lazily loaded users related to status');
       this.setState({
         poster: appStore.get(posterId, 'Users'),
         recipient: appStore.get(recipientId, 'Users')
@@ -56,7 +54,7 @@ var StatusView = React.createClass({
     var recipientName = extractName(state.recipient);
     var posterName = extractName(state.poster);
 
-    var recipientUrl = '/#profiles/id/' + this.props.status.recipientId;
+    var recipientUrl = '/#profile/id/' + this.props.status.recipientId;
     var posterUrl = '/#profile/id/' + this.props.status.posterId;
 
     return (
@@ -73,7 +71,9 @@ var StatusView = React.createClass({
               </a>
             </strong>
             <br/>
-            {timeSince}
+            <span style={{ color: '#9197a3' }}>
+              {timeSince}
+            </span>
           </p>
           {this.props.status.content}
         </Loader>
