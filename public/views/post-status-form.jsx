@@ -32,7 +32,9 @@ var PostStatusFormView = React.createClass({
       },
       success: (status) => {
         this.props.appStore.fetch([status._id], 'Statuses', () => {
-          this.props.app.render();
+          this.setState({ status: '' }, () => {
+            this.props.app.render();
+          });
         });
       },
       error: (err) => {
@@ -47,7 +49,9 @@ var PostStatusFormView = React.createClass({
     var Button = ReactBootstrap.Button;
     return (
       <Panel header='Update Status'>
-        <Input type='textarea' placeholder="What's on your mind?"
+        <Input type='textarea'
+          value={this.state.status}
+          placeholder="What's on your mind?"
           onChange={(e) => {
             this.setState({ status: e.target.value });
         }}/>

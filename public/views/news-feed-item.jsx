@@ -23,9 +23,24 @@ var NewsFeedItem = React.createClass({
   },
 
   getInitialState() {
+    var props = this.props;
+    // If the action object is passed in, use it.
+    // Otherwise, check the cache in case action is already loaded.
+    var initialAction = props.action
+      ? props.action
+      : (props.actionId && props.appStore.get(props.actionId, 'Actions'));
+
+    // If the item object is passed in, user it.
+    // Otherwise, if the action object is populated,
+    // check the cache for an item of that type
+    var initialItem = props.item;
+    if (initialAction && !initialItem) {
+      var itemType = props.app.pluralizeModel(initialAction.actionType);
+      initialItem = props.itemId && props.appStore(props.itemId, itemType);
+    }
     return {
-      action: this.props.action,
-      item: this.props.item
+      action: initialAction,
+      item: initialItem
     };
   },
 
