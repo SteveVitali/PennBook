@@ -101,6 +101,14 @@ module.exports = function(vogels, Joi, CRUD) {
       .exec(function(err, data) {
         callback(err, _.pluck(data.Items, 'attrs'));
       });
+    },
+		
+		getAllUsers: function(callback) {
+      User.scan()
+      .loadAll()
+      .exec(function(err, data) {
+        callback(err, _.pluck(data.Items, 'attrs'));
+      });
     }
   };
 };
