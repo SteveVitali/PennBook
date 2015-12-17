@@ -2,7 +2,15 @@ var vogels = require('vogels');
 var Joi = require('joi');
 var _ = require('lodash');
 
-vogels.AWS.config.loadFromPath('credentials.json');
+try {
+  vogels.AWS.config.loadFromPath('credentials.json');
+} catch (err) {
+  vogels.AWS.config.update({
+    accessKeyId: process.env.accessKeyId,
+    secretAccessKey: process.env.secretAccessKey,
+    region: process.env.region
+  });
+}
 
 // Helpers for doing simple CRUD functions on generic models
 var CRUD = function(model) {

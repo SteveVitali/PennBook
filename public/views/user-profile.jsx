@@ -219,6 +219,11 @@ var UserProfileView = React.createClass({
               </Tab>
               <Tab eventKey={3} title='Friends'>
                 <Loader loaded={this.lazyLoadFriends()}>
+                  <h4>
+                    <a href='/vis' target='_blank'>
+                      Visualizer
+                    </a>
+                  </h4>
                   { _.compact(_.map(this.state.friendships, (friendship) => {
                     var friendId = friendship.ownerId === profileUser._id
                       ? friendship.friendId

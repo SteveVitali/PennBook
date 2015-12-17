@@ -65,6 +65,7 @@ var NewsFeedView = React.createClass({
     var Input = ReactBootstrap.Input;
     var userId = this.props.user._id;
     var appStore = this.props.appStore;
+    var friendIds = {};
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
@@ -98,6 +99,8 @@ var NewsFeedView = React.createClass({
                   ? friendship.friendId
                   : friendship.ownerId;
                 var friend = appStore.get(friendId, 'Users') || {};
+                if (!friend || friendIds[friend._id]) return;
+                friendIds[friend._id] = true;
                 if (friend.isLoggedIn) {
                   return (
                     <p>
