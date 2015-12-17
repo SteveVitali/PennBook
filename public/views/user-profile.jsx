@@ -34,7 +34,8 @@ var UserProfileView = React.createClass({
     return {
       tabKey: this.props.tabKey || 1,
       profileOwner: initialOwner,
-      actions: null
+      actions: null,
+      friendship: this.getProfileFriendship()
     };
   },
 
@@ -88,7 +89,9 @@ var UserProfileView = React.createClass({
 
   getProfileFriendship() {
     var allFriends = this.props.appStore.getAll('Friendships');
-    var profileId = this.props.profileOwnerId || this.state.profileOwner._id;
+    var profileId = this.props.profileOwnerId ||
+                    this.props.profileOwner._id ||
+                    this.state.profileOwner._id;
     var userId = this.props.user._id;
 
     // Return the friendship if one exists
@@ -104,7 +107,6 @@ var UserProfileView = React.createClass({
       type: 'delete',
       url: '/api/friendships/' + id,
       success: () => {
-        console.log('Successfully unfriended user');
         // Update appStore explicitly
         this.props.appStore.modelHash.Friendships.remove(id);
         this.setState({
@@ -126,10 +128,10 @@ var UserProfileView = React.createClass({
         friendId: this.state.profileOwner._id
       },
       success: (friendship) => {
-        console.log('Successfully friended user', friendship);
-        this.props.appStore.add(friendship, 'Friendships');
-        this.setState({
-          friendship: friendship
+        this.props.appStore.fetch([friendship._id], 'Friendships', () => {
+          this.setState({
+            friendship: friendship
+          });
         });
       },
       error: (err) => {

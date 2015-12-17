@@ -96,7 +96,6 @@ var NewsFeedItem = React.createClass({
     var itemId = this.state.item._id;
 
     $.get('/api/item/' + itemId + '/comments', (comments) => {
-      comments.length && console.log('Fetched comments', comments);
       this.setState({
         comments: comments
       });

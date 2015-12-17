@@ -38,6 +38,8 @@ module.exports = function(app) {
   app.get('/api/users/:id/profile-feed', loggedIn, api.User.getProfileFeed);
 
   app.post('/api/friendships', loggedIn, api.Friendship.create);
+  app.delete('/api/friendships/:id', loggedIn, api.Friendship.destroy);
+  app.get('/api/friendships/:id', loggedIn, api.Friendship.findById);
 
   app.get('/api/statuses/:id', loggedIn, api.Status.findById);
   app.post('/api/statuses', loggedIn, api.Status.post);

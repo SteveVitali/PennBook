@@ -7,6 +7,17 @@ vogels.AWS.config.loadFromPath('credentials.json');
 // Helpers for doing simple CRUD functions on generic models
 var CRUD = function(model) {
   return {
+    create: function(modelObj, params, callback) {
+      // Make params argument optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = {};
+      }
+      model.create(modelObj, params, function(err, modelData) {
+        callback(err, modelData && modelData.attrs);
+      });
+    },
+
     findById: function(id, callback) {
       model.query(id).exec(function(err, modelData) {
         var results = _.pluck(modelData.Items, 'attrs');
@@ -14,26 +25,24 @@ var CRUD = function(model) {
       });
     },
 
-    create: function(modelObj, params, callback) {
-      // Make params argument optional
-      if (_.isFunction(params)) {
-        callback = params;
-        params = null;
-      }
-      model.create(modelObj, params || {}, function(err, modelData) {
-        callback(err, modelData && modelData.attrs);
-      });
-    },
-
     update: function(updatedObj, params, callback) {
       // params are optional
       if (_.isFunction(params)) {
         callback = params;
-        params = null;
+        params = {};
       }
-      model.update(updatedObj, params || {}, function(err, modelObj) {
+      model.update(updatedObj, params, function(err, modelObj) {
         callback(err, modelObj && modelObj.attrs);
       });
+    },
+
+    destroy: function(modelObject, params, callback) {
+      // params are optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = {};
+      }
+      model.destroy(modelObject, params, callback);
     }
   };
 };
