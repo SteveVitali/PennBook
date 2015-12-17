@@ -191,7 +191,7 @@ var UserProfileInfoView = React.createClass({
               return index + 1916;
             }),
             label: 'Year',
-            defaultValue: birthdate.getYear()
+            defaultValue: birthdate.getFullYear()
           }
         },
         label: 'Birthday'

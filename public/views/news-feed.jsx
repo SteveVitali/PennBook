@@ -55,7 +55,6 @@ var NewsFeedView = React.createClass({
   },
 
   render() {
-    console.log('this.props', this.props);
     var Row = ReactBootstrap.Row;
     var Col = ReactBootstrap.Col;
     var Panel = ReactBootstrap.Panel;
