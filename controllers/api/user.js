@@ -56,10 +56,28 @@ exports.getNewsFeed = function(req, res) {
 };
 
 exports.getProfileFeed = function(req, res) {
-  var id = req.params.id;
-  Action.getUserProfileFeed(id, function(err, actions) {
+  var profileId = req.params.id;
+  var userId = req.session.user._id;
+
+  // Make sure user is friends with profile whose feed he's fetching
+  var authorize = function(done) {
+    if (profileId === userId) {
+      return async.nextTick(function() {
+        done(null, true);
+      });
+    }
+    Friendship.findByUserIds(profileId, userId, function(err, friendships) {
+      done(err, friendships && friendships.length > 0);
+    });
+  };
+  authorize(function(err, authorized) {
     if (err) return onErr(err, res);
-    res.send(actions);
+    if (!authorized) return onErr('Unauthorized profile feed', res);
+
+    Action.getUserProfileFeed(profileId, function(err, actions) {
+      if (err) return onErr(err, res);
+      res.send(actions);
+    });
   });
 };
 
