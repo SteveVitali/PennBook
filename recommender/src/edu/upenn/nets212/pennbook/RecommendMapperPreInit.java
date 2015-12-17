@@ -6,29 +6,31 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class SocialRankMapperReciprocity extends
+public class RecommendMapperPreInit extends
 		Mapper<LongWritable, Text, Text, Text> {
 
 	@Override
 	// Our map method: outputs intermediate key-value pairs of
 	// Text-Text objects. It reads each file in our input
 	// directory one line at a time. The corresponding reducer is meant to
-	// mark all edges it finds to be bidirectional. This can then be counted by
-	// another MapReduce job.
+	// prepare the data for the SocialRank algorithm as implemented by the
+	// "iter" command. To do so, the map function prepares each vertex to know
+	// what its adjacent vertices (if any) are.
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException {
-		// Split the line into an edge's endpoints.
+		// Parse the input line into its vertices and sentinel.
 		String line = value.toString();
 		String[] ends = line.split("\t");
 
-		// Per the description given in reciprocity.txt, the way edges are
-		// detected is through duplicate values emitted to the same key. These
-		// values are obtained by flipping the larger of our vertex-vertex pairs
-		// before emitting.
-		if (Integer.parseInt(ends[0]) > Integer.parseInt(ends[1])) {
+		// Emit every edge in the graph.
+		// If it does not represent an interest, mark it as such.
+		if (ends[2].equals("0")) {
 			context.write(new Text(ends[1]), new Text(ends[0]));
 		} else {
-			context.write(new Text(ends[0]), new Text(ends[1]));
+			context.write(new Text("*" + ends[0]), new Text(ends[1]));
+
+			// Don't emit nodes with no outbound edges.
+			context.write(new Text("*" + ends[1]), new Text("none"));
 		}
 	}
 }
