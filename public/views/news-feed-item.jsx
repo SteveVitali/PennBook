@@ -147,7 +147,7 @@ var NewsFeedItem = React.createClass({
 
         <Loader loaded={this.lazyLoadComments()} scale={0.8}>
           <br/>
-          <Table condensed>
+          <Table condensed responsive>
             <tbody>
               { _.map(this.state.comments, (comment) => {
                 return (
