@@ -31,8 +31,10 @@ var NewsFeedView = React.createClass({
     if (this.state.cachedFriends) return true;
 
     var appStore = this.props.appStore;
-    var friendships = this.props.Friendships;
+    var friendships = this.props.Friendships || [];
     var userId = this.props.user._id;
+
+    if (friendships.length === 0) return true;
 
     // Get all the ids of the uncached friends
     var uncachedUserIds = [];
