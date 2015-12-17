@@ -42,7 +42,8 @@ var UserProfileView = React.createClass({
     this.setState({
       tabKey: nextProps.tabKey,
       profileOwner: nextProps.profileOwner,
-      actions: null
+      actions: null,
+      isFriendProfile: this.isFriendProfile()
     });
   },
 
@@ -70,6 +71,8 @@ var UserProfileView = React.createClass({
   lazyLoadFeed() {
     if (!this.lazyLoadUser()) return false;
     if (this.state.actions) return true;
+    if (!this.state.isFriendProfile && !this.isOwnProfile()) return true;
+
     var userId = this.state.profileOwner._id;
     $.get('/api/users/' + userId + '/profile-feed', (actions) => {
       this.setState({
@@ -83,30 +86,103 @@ var UserProfileView = React.createClass({
            this.props.app.user._id === this.state.profileOwner._id;
   },
 
+  isFriendProfile() {
+    var allFriends = this.props.appStore.getAll('Friendships');
+    var profileId = this.props.profileOwnerId || this.state.profileOwner._id;
+    var userId = this.props.user._id;
+
+    return !!_.find(allFriends, function(rel) {
+      return (rel.ownerId === profileId && rel.friendId === userId) ||
+             (rel.ownerId === userId && rel.friendId === profileId);
+    });
+  },
+
+  unfriend() {
+    var userId = this.props.user._id;
+    var friendId = this.props.profileOwner._id;
+    $.ajax({
+      type: 'post',
+      url: '/api/users/' + userId + '/add-friend/' + friendId,
+      success: () => {
+        console.log('Successfully friended user');
+        this.setState({
+          isFriendProfile: true
+        });
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  },
+
+  addFriend() {
+    var userId = this.props.user._id;
+    var friendId = this.props.profileOwner._id;
+    $.ajax({
+      type: 'post',
+      url: '/api/users/' + userId + '/unfriend/' + friendId,
+      success: () => {
+        console.log('Successfully unfriended user');
+        this.setState({
+          isFriendProfile: false
+        });
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  },
+
   render() {
     var Tabs = ReactBootstrap.Tabs;
     var Tab = ReactBootstrap.Tab;
+    var Row = ReactBootstrap.Row;
+    var Col = ReactBootstrap.Col;
+    var Button = ReactBootstrap.Button;
+    var buttonData = this.state.isFriendProfile
+      ? { text: 'Unfriend', onClick: this.unfriend }
+      : { text: 'Add Friend', onClick: this.addFriend };
+
+    var profileUser = this.state.profileOwner || {};
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
         <div className='container'>
           <Loader loaded={this.lazyLoadFeed()}>
+            <Row>
+              <Col xs={8} sm={8} md={8} lg={8}>
+                <h3 style={{ marginTop: '-10px', marginBottom: '10px' }}>
+                  {profileUser.firstName + ' ' + profileUser.lastName}
+                </h3>
+              </Col>
+              <Col xs={4} sm={4} md={4} lg={4}>
+                { !this.isOwnProfile() && (
+                  <span style={{ float: 'right' }}>
+                    <Button bsSize='small' onClick={buttonData.onClick}>
+                      {buttonData.text}
+                    </Button>
+                  </span>
+                )}
+              </Col>
+            </Row>
             <Tabs activeKey={this.state.tabKey}
               animation={false}
               onSelect={this.handleSelectTab}>
-              <Tab eventKey={1} title='Timeline'>
-                <PostStatusFormView app={this.props.app}
-                  statusPoster={this.props.user}
-                  statusRecipient={this.state.profileOwner}
-                  appStore={this.props.appStore}/>
-                { _.map(this.state.actions, (action, key) => {
-                  return (
-                    <NewsFeedItem action={action} key={key}
-                      app={this.props.app}
-                      appStore={this.props.appStore}/>
-                  );
-                })}
-              </Tab>
+              { (this.state.isFriendProfile || this.isOwnProfile()) && (
+                <Tab eventKey={1} title='Timeline'>
+                  <PostStatusFormView app={this.props.app}
+                    statusPoster={this.props.user}
+                    statusRecipient={this.state.profileOwner}
+                    appStore={this.props.appStore}/>
+                  { _.map(this.state.actions, (action, key) => {
+                    return (
+                      <NewsFeedItem action={action} key={key}
+                        app={this.props.app}
+                        appStore={this.props.appStore}/>
+                    );
+                  })}
+                </Tab>
+              )}
               <Tab eventKey={2} title='About'>
                 <br/>
                 <UserProfileInfoView
