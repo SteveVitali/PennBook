@@ -23,7 +23,10 @@ var NewsFeedView = React.createClass({
     return {
       status: '',
       cachedFriends: false,
-      Friendships: this.props.appStore.getAll('Friendships')
+      Friendships: this.props.appStore.getAll('Friendships'),
+      actions: _.sortBy(this.props.Actions, function(action) {
+        return -1 * (new Date(action.datetime)).getTime();
+      })
     };
   },
 
@@ -77,7 +80,7 @@ var NewsFeedView = React.createClass({
               statusPoster={this.props.user}
               statusRecipient={this.props.user}
               appStore={this.props.appStore}/>
-            { _.map(this.props.Actions, (action, key) => {
+            { _.map(this.state.actions, (action, key) => {
               return (
                 <NewsFeedItem action={action} key={key}
                   app={this.props.app}

@@ -77,7 +77,9 @@ var UserProfileView = React.createClass({
     var userId = this.state.profileOwner._id;
     $.get('/api/users/' + userId + '/profile-feed', (actions) => {
       this.setState({
-        actions: actions
+        actions: _.sortBy(actions, function(action) {
+          return -1 * (new Date(action.datetime)).getTime();
+        })
       });
     });
   },
