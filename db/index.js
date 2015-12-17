@@ -25,6 +25,12 @@ var CRUD = function(model) {
         callback(err, modelData && modelData.attrs);
       });
     },
+		
+		createFriend: function(modelObj, callback) {
+      model.create(modelObj, function(err, modelData) {
+        callback(err, modelData && modelData.attrs);
+      });
+    },
 
     findById: function(id, callback) {
       model.query(id).exec(function(err, modelData) {

@@ -29,9 +29,10 @@ exports.create = function(req, res) {
     friendId: friendId,
     dateFriended: new Date()
   };
-  Friendship.create(friendship, function(err, friendship) {
+  Friendship.create(friendship, function(err, fship) {
+		console.log("step 1");
     if (err) return onErr(err);
-    res.send(friendship);
+    res.send(fship);
   });
 };
 

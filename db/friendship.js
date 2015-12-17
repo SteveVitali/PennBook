@@ -78,7 +78,7 @@ module.exports = function(vogels, Joi, CRUD) {
       }, callback);
     },
 
-    create: function(friendship, params, callback) {
+    create: function(friendship, callback) {
 			// Make sure to add the other edge of this friendship to the table.
 			var inverse = {
 				ownerId: friendship.friendId,
@@ -86,10 +86,11 @@ module.exports = function(vogels, Joi, CRUD) {
 				dateFriended: friendship.dateFriended
 			};
 
-      CRUD.create(inverse, params, function(err, friendship) {
+      CRUD.createFriend(inverse, function(err, dat) {
         if (err) return callback(err);
-        CRUD.create(friendship, params, function(err, friendship) {
-          callback(err, friendship);
+        CRUD.createFriend(friendship, function(error, fship) {
+					console.log("step 2");
+          callback(error, fship);
         });
       });
     },
