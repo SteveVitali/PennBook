@@ -33,6 +33,7 @@ module.exports = function(vogels, Joi, CRUD) {
       Recommendation
       .query(ownerId)
       .usingIndex('ownerIdIndex')
+			.descending()
       .exec(function(err, data) {
         callback(err, _.pluck(data.Items, 'attrs'));
       });

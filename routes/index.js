@@ -37,6 +37,9 @@ module.exports = function(app) {
   app.get('/api/users/:id/news-feed', loggedIn, api.User.getNewsFeed);
   app.get('/api/users/:id/profile-feed', loggedIn, api.User.getProfileFeed);
 
+	// Recommender
+	app.get('/api/users/:id/recommended-friends', loggedIn, api.User.getRecommended);
+	
   app.post('/api/friendships', loggedIn, api.Friendship.create);
   app.delete('/api/friendships/:id', loggedIn, api.Friendship.destroy);
   app.get('/api/friendships/:id', loggedIn, api.Friendship.findById);

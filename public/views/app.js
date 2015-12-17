@@ -167,6 +167,7 @@ var App = Backbone.View.extend({
   },
 
   viewProfileById(id) {
+		console.log("Should refresh!");
     this.viewProfile(null, { profileOwnerId: id });
   }
 });
