@@ -44,6 +44,7 @@ var Friendship = require('./friendship')(vogels, Joi, CRUD);
 var FriendRequest = require('./friend-request')(vogels, Joi, CRUD);
 var Action = require('./action')(vogels, Joi, CRUD);
 var Status = require('./status')(vogels, Joi, CRUD);
+var Recommendation = require('./recommendation')(vogels, Joi, CRUD);
 
 module.exports = {
   User: User,
@@ -51,5 +52,6 @@ module.exports = {
   Comment: Comment,
   Friendship: Friendship,
   Action: Action,
-  FriendRequest: FriendRequest
+  FriendRequest: FriendRequest,
+	Recommendation: Recommendation
 };

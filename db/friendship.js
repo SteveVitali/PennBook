@@ -66,7 +66,7 @@ module.exports = function(vogels, Joi, CRUD) {
         .query(userId)
         .usingIndex('FriendIdIndex')
         .exec(function(err, moreFriendships) {
-          console.log(err);
+          //console.log(err);
           var friendData = _.pluck(friendships.Items, 'attrs');
           var moreFriendData = _.pluck(moreFriendships.Items, 'attrs');
           callback(err, friendData.concat(moreFriendData));
