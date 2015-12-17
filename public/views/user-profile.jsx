@@ -35,7 +35,8 @@ var UserProfileView = React.createClass({
       tabKey: this.props.tabKey || 1,
       profileOwner: initialOwner,
       actions: null,
-      friendship: this.getProfileFriendship()
+      friendship: this.getProfileFriendship(),
+      friendships: null
     };
   },
 
@@ -44,7 +45,8 @@ var UserProfileView = React.createClass({
       tabKey: nextProps.tabKey,
       profileOwner: nextProps.profileOwner,
       actions: null,
-      friendship: this.getProfileFriendship()
+      friendship: this.getProfileFriendship(),
+      friendships: null
     });
   },
 
@@ -90,7 +92,6 @@ var UserProfileView = React.createClass({
     var userId = this.state.profileOwner._id;
     $.get('/api/users/' + userId + '/friendships', (friendships) => {
       this.props.app.initializeFriends(friendships, () => {
-        console.log('Initialized friends');
         this.setState({
           friendships: friendships
         });
@@ -167,6 +168,8 @@ var UserProfileView = React.createClass({
       : { text: 'Add Friend', onClick: this.addFriend };
 
     var profileUser = this.state.profileOwner || {};
+    var appStore = this.props.appStore;
+    var userIds = {};
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
@@ -216,19 +219,21 @@ var UserProfileView = React.createClass({
               </Tab>
               <Tab eventKey={3} title='Friends'>
                 <Loader loaded={this.lazyLoadFriends()}>
-                  { _.map(this.state.friendships, (friendship) => {
+                  { _.compact(_.map(this.state.friendships, (friendship) => {
                     var friendId = friendship.ownerId === profileUser._id
                       ? friendship.friendId
                       : friendship.ownerId;
-                    var friend = this.props.appStore.get(friendId, 'Users');
+                    var friend = appStore.get(friendId, 'Users') || {};
+                    if (!friend || userIds[friendId]) return;
+                    userIds[friendId] = true;
                     return (
                       <p>
-                        <a href={'#/profile/id/' + friend._id}>
+                        <a href={'#/profile/id/' + friendId}>
                           {friend.firstName + ' ' + friend.lastName}
                         </a>
                       </p>
                     );
-                  })}
+                  }))}
                 </Loader>
               </Tab>
             </Tabs>
