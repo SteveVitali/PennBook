@@ -57,6 +57,17 @@ var NewsFeedView = React.createClass({
     });
   },
 
+  lazyLoadRecommendations() {
+    if (this.state.recommendations) return true;
+    var userId = this.props.user._id;
+    $.get('/api/users/' + userId + '/recommended-friends', (people) => {
+      console.log('fetched recommendations', people);
+      this.setState({
+        recommendations: people
+      });
+    });
+  },
+
   render() {
     var Row = ReactBootstrap.Row;
     var Col = ReactBootstrap.Col;
@@ -111,6 +122,21 @@ var NewsFeedView = React.createClass({
                   );
                 }
               }))}
+            </Loader>
+            <hr/>
+            <p>
+              <strong>People You May Know</strong>
+            </p>
+            <Loader loaded={this.lazyLoadRecommendations()} scale={0.8}>
+              { _.map(this.state.recommendations, function(person) {
+                return (
+                  <p>
+                    <a href={'/#profile/id/' + person._id}>
+                      {person.firstName + ' ' + person.lastName + ' '}
+                    </a>
+                  </p>
+                );
+              })}
             </Loader>
           </Col>
         </Row>

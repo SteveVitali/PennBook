@@ -35,7 +35,7 @@ var UserProfileView = React.createClass({
       tabKey: this.props.tabKey || 1,
       profileOwner: initialOwner,
       actions: null,
-      friendship: this.getProfileFriendship(),
+      friendship: this.getProfileFriendship(this.props),
       friendships: null
     };
   },
@@ -45,7 +45,7 @@ var UserProfileView = React.createClass({
       tabKey: nextProps.tabKey,
       profileOwner: nextProps.profileOwner,
       actions: null,
-      friendship: this.getProfileFriendship(),
+      friendship: this.getProfileFriendship(nextProps),
       friendships: null
     });
   },
@@ -104,13 +104,11 @@ var UserProfileView = React.createClass({
            this.props.app.user._id === this.state.profileOwner._id;
   },
 
-  getProfileFriendship() {
-    var allFriends = this.props.appStore.getAll('Friendships');
-    var profileId = this.props.profileOwnerId ||
-                    this.props.profileOwner._id ||
-                    this.state.profileOwner._id;
-    var userId = this.props.user._id;
-
+  getProfileFriendship(props) {
+    var allFriends = props.appStore.getAll('Friendships');
+    var profileId = props.profileOwnerId ||
+                    props.profileOwner._id;
+    var userId = props.user._id;
     // Return the friendship if one exists
     return _.find(allFriends, function(rel) {
       return (rel.ownerId === profileId && rel.friendId === userId) ||

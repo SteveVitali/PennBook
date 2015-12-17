@@ -1,10 +1,10 @@
 var _ = require('lodash');
+var async = require('async');
 var User = require('../../db').User;
 var Friendship = require('../../db').Friendship;
 var Action = require('../../db').Action;
 var Recommendation = require('../../db').Recommendation;
 var models = require('../../db');
-
 var onErr = function(err, res) {
   err && console.log(err);
   res.status(500).send(err);
@@ -36,68 +36,6 @@ exports.update = function(req, res) {
   });
 };
 
-exports.getRecommended = function(req, res) {
-	var userID = req.params.id;
-	// Record all friends of this user.
-	models.Friendship.getFriendshipsOfUser(userID, function(err, friendships) {
-		if (err) {
-			console.log("Error: " + err);
-		}
-		
-		var friends = [];
-		async.each(friendships, function(friendship, next) {
-			var owner = friendship.ownerId;
-			if (owner == userID) {
-				friends.push(friendship.friendId);
-				next();
-			} else {
-				next();
-			}
-		},
-		function(err) {
-			err && console.log(err);
-
-			// Once you have all of the friends, find all recommendations.
-			models.Recommendation.findForOwner(userID, function(err, recommendations) {
-				//console.log(recommendations);
-				var recUserIDs = [];
-				async.each(recommendations, function(recommendation, next) {
-					// If this recommendation is already a friend, skip it.
-					if (friends.indexOf(recommendation.friendId) > -1) {
-						next();
-					} else {
-						// Otherwise, add it to the recommendation (unless we already have 5).
-						if (recUserIDs.length < 5) {
-							recUserIDs.push(recommendation.friendId);
-						}
-						next();
-					}
-				},
-				function(err) {
-					err && console.log(err);
-							
-					var topUsers = [];
-					
-					// Get the user objects for each of the detected IDs.
-					async.each(recUserIDs, function(recID, next) {
-						models.User.findById(recID, function(err, data) {
-							topUsers.push(data);
-							next();
-						});
-					},
-					function(err) {
-						err && console.log(err);
-						
-						// Return the highly-recommended users.
-						// console.log(topUsers);
-						res.send(topUsers);
-					});
-				});
-			});
-		});
-	});
-};
-
 exports.getFriendships = function(req, res) {
   var id = req.params.id;
   Friendship.getFriendshipsOfUser(id, function(err, friendships) {
@@ -122,5 +60,47 @@ exports.getProfileFeed = function(req, res) {
   Action.getUserProfileFeed(id, function(err, actions) {
     if (err) return onErr(err, res);
     res.send(actions);
+  });
+};
+
+exports.getRecommended = function(req, res) {
+  var userID = req.params.id;
+  // Record all friends of this user.
+  Friendship.getFriendshipsOfUser(userID, function(err, friendships) {
+    if (err) return onErr(err, res);
+
+    // Get unique set of friend id's
+    var friends = _.uniq(_.pluck(friendships, 'friendId'));
+
+    // Once you have all of the friends, find all recommendations.
+    Recommendation.findForOwner(userID, function(err, recommendations) {
+      if (err) return onErr(err, res);
+      console.log('got recommendations', recommendations);
+
+      // Get list of recommendations of users not yet friended
+      var viableRecommendations = _.filter(recommendations, function(rec) {
+        return friends.indexOf(rec.friendId) === -1;
+      });
+      console.log('viable recommendations', viableRecommendations);
+
+      // Extract the ids of the viable recommended users
+      var recUserIDs = _.pluck(viableRecommendations, 'friendId');
+      console.log('got recUserIds', recUserIDs);
+
+      var topUsers = [];
+      // Get the user objects for each of the detected IDs.
+      async.each(recUserIDs, function(recID, next) {
+        User.findById(recID, function(err, data) {
+          if (err) return onErr(err, res);
+          topUsers.push(data);
+          next(err);
+        });
+      },
+      function(err) {
+        if (err) return onErr(err, res);
+        console.log('got recommendation users', topUsers);
+        res.send(topUsers);
+      });
+    });
   });
 };

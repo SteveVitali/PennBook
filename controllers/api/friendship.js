@@ -30,7 +30,6 @@ exports.create = function(req, res) {
     dateFriended: new Date()
   };
   Friendship.create(friendship, function(err, fship) {
-		console.log("step 1");
     if (err) return onErr(err);
     res.send(fship);
   });

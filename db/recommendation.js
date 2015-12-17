@@ -49,7 +49,7 @@ module.exports = function(vogels, Joi, CRUD) {
 				callback(err, _.pluck(data.Items, 'attrs'));
 			});
 		},
-		
+
     create: function(user, params, callback) {
       CRUD.create(user, params, callback);
     },
