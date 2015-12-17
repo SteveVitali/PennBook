@@ -18,8 +18,8 @@ public class RecommendReducerIter extends Reducer<Text, Text, Text, Text> {
 	public void reduce(Text key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException {
 		// Populate a map with the summation of new scores.
-		Map<Integer, Double> sums = new HashMap<Integer, Double>();
-		int keyID = Integer.parseInt(key.toString());
+		Map<String, Double> sums = new HashMap<String, Double>();
+		String keyID = key.toString();
 
 		// While finding summations, pick out your neighbors.
 		int numNeighbors = 0;
@@ -30,7 +30,7 @@ public class RecommendReducerIter extends Reducer<Text, Text, Text, Text> {
 			// Discern neighbors among crowd
 			if (node.contains("x")) {
 				String[] split = node.split("x");
-				int id = Integer.parseInt(split[0]);
+				String id = split[0];
 				double score = Double.parseDouble(split[1]);
 				neighbors += (id + ",");
 				numNeighbors++;
@@ -43,7 +43,7 @@ public class RecommendReducerIter extends Reducer<Text, Text, Text, Text> {
 				}
 			} else if (node.contains("=")) {
 				String[] split = node.split("=");
-				int id = Integer.parseInt(split[0]);
+				String id = split[0];
 				double score = Double.parseDouble(split[1]);
 
 				// Update this vertex in the summation table
@@ -58,8 +58,8 @@ public class RecommendReducerIter extends Reducer<Text, Text, Text, Text> {
 		// Process list of all known values. Omit the value of this vertex
 		// itself.
 		String known = "";
-		for (Integer id : sums.keySet()) {
-			if (id != keyID) {
+		for (String id : sums.keySet()) {
+			if (!id.equals(keyID)) {
 				double score = sums.get(id);
 				known += (id + "=" + score + ",");
 			}

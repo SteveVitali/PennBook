@@ -54,6 +54,8 @@ public class RecommendDriver {
 			} else // If it's the finish command
 			if (command.equals("finish")) {
 				finish(args);
+			} else if (command.equals("pre")) {
+				pre(args);
 			} else {
 				System.out.println(args[0]
 						+ " is not a valid command (check your arguments).");
@@ -73,14 +75,16 @@ public class RecommendDriver {
 				// Prepare arguments for our commands. There are two sets of
 				// "iter" arguments because these must swap input back and
 				// forth between two directories.
-				String[] initArgs = { "init", args[1], args[3], args[6] };
+				String[] preArgs = {"pre", args[1], "preInitOut", args[6]};
+				String[] initArgs = { "init", "preInitOut", args[3], args[6] };
 				String[] iterOneArgs = { "iter", args[3], args[4], args[6] };
 				String[] iterTwoArgs = { "iter", args[4], args[3], args[6] };
 				String[] diffArgs = { "diff", args[3], args[4], args[5],
 						args[6] };
 
 				// Begin the adsorption algorithm.
-				// First, initialize:
+				// First, pre-initialize then initialize:
+				pre(preArgs);
 				init(initArgs);
 
 				// Define variables for handling the alternating "iter"
@@ -141,6 +145,10 @@ public class RecommendDriver {
 		if (args.length == 0) {
 			System.out.println("Please enter a command.");
 		} else {
+			if (args[0].equals("pre")) {
+				System.out
+						.println("pre syntax: pre <inputDir> <outputDir> <#reducers>");
+			}
 			if (args[0].equals("init")) {
 				System.out
 						.println("init syntax: init <inputDir> <outputDir> <#reducers>");
@@ -162,6 +170,45 @@ public class RecommendDriver {
 						.println("composite syntax: composite <inputDir> <outputDir> <intermDir1> <intermDir2> <diffDir> <#reducers>");
 			}
 		}
+	}
+
+	/**
+	 * Execute the "pre" command on the provided arguments.
+	 * 
+	 * @param args
+	 *            the arguments to run "pre" with.
+	 * @throws Exception
+	 */
+	private static void pre(String[] args) throws Exception {
+		// Grab our input and output paths
+		String input = args[1];
+		String output = args[2];
+
+		Configuration conf = new Configuration();
+		Job job = new Job(conf, "pre");
+		job.setJarByClass(RecommendDriver.class);
+
+		// Set our intermediate key and value
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+
+		// Set our map and reduce methods
+		job.setMapperClass(RecommendMapperPreInit.class);
+		job.setReducerClass(RecommendReducerPreInit.class);
+
+		// Set the input directory.
+		FileInputFormat.addInputPath(job, new Path(input));
+
+		// If the output directory already exists, delete it before
+		// setting the new output directory.
+		deleteDirectory(output);
+		FileOutputFormat.setOutputPath(job, new Path(output));
+
+		// Set the number of reducers from our command args
+		job.setNumReduceTasks(Integer.parseInt(args[3]));
+
+		// Wait for the job to finish
+		job.waitForCompletion(true);
 	}
 
 	/**

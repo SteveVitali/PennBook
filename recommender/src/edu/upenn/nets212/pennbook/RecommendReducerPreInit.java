@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class RecommendReducerInit extends Reducer<Text, Text, Text, Text> {
+public class RecommendReducerPreInit extends Reducer<Text, Text, Text, Text> {
 
 	@Override
 	// Our reduce method: reads all values associated with a given vertex.
@@ -21,30 +21,28 @@ public class RecommendReducerInit extends Reducer<Text, Text, Text, Text> {
 	// this information.
 	public void reduce(Text key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException {
-		// Collect all neighbors into a delimited String.
-		String neighbors = "";
-		// Make sure to filter out neighbors already encountered.
-		List<String> seen = new ArrayList<String>();
-		int numNeighbors = 0; // Adsorption needs the number of neighbors.
-		for (Text neighbor : values) {
-			String neighborString = neighbor.toString();
-			// If this is a valid neighbor that we have not seen yet
-			if (!neighborString.equals("none")
-					&& !seen.contains(neighborString)) {
-				numNeighbors++;
-				neighbors += neighborString + ",";
-				seen.add(neighborString);
+		// Ignore specially-marked data.
+		if (key.toString().charAt(0) == '*') {
+			for (Text neighbor : values) {
+				context.write(new Text(key.toString().substring(1)), neighbor);
 			}
 		}
 
-		// If there are no neighbors, denote this with a "none"
-		if (neighbors.length() == 0) {
-			neighbors = "none";
+		// The rest of this data represents either interests or affiliations.
+		// Each of these nodes is paired up with all others. Copy into list to
+		// work around strange Hadoop data types.
+		List<String> neighbors = new ArrayList<String>();
+		for (Text neighbor : values) {
+			neighbors.add(neighbor.toString());
 		}
-
-		// Emit the vertex, its rank, the number of neighbors, and its list of
-		// neighbors.
-		context.write(key, new Text("1\t" + numNeighbors + "\t" + neighbors
-				+ "\t-"));
+		
+		for (String neighbor1 : neighbors) {
+			for (String neighbor2 : neighbors) {
+				System.out.println(key.toString() + " " + neighbor1 + " " + neighbor2);
+				if (!neighbor1.equals(neighbor2)) {
+					context.write(new Text(neighbor1), new Text(neighbor2));
+				}
+			}
+		}
 	}
 }
