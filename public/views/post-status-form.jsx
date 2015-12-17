@@ -36,12 +36,11 @@ var PostStatusFormView = React.createClass({
       },
       success: (status) => {
         // Cache the status in the app store and re-render
-        this.props.appStore.fetch([status._id], 'Statuses', () => {
-          this.setState({
-            status: '',
-            submitDisabled: false
-          }, () => { this.props.app.render(); });
-        });
+        this.props.appStore.add(status, 'Statuses');
+        this.setState({
+          status: '',
+          submitDisabled: false
+        }, () => { this.props.app.render(); });
       },
       error: (err) => {
         console.log(err);

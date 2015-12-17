@@ -12,8 +12,7 @@ var NewsFeedView = React.createClass({
     app: React.PropTypes.object.isRequired,
     appStore: React.PropTypes.object.isRequired,
     user: React.PropTypes.object.isRequired,
-    Actions: React.PropTypes.arrayOf(React.PropTypes.object),
-    Friendships: React.PropTypes.arrayOf(React.PropTypes.object)
+    Actions: React.PropTypes.arrayOf(React.PropTypes.object)
   },
 
   getDefaultProps() {
@@ -23,7 +22,11 @@ var NewsFeedView = React.createClass({
   getInitialState() {
     return {
       status: '',
-      cachedFriends: false
+      cachedFriends: false,
+      Friendships: this.props.appStore.getAll('Friendships'),
+      actions: _.sortBy(this.props.Actions, function(action) {
+        return -1 * (new Date(action.datetime)).getTime();
+      })
     };
   },
 
@@ -31,7 +34,7 @@ var NewsFeedView = React.createClass({
     if (this.state.cachedFriends) return true;
 
     var appStore = this.props.appStore;
-    var friendships = this.props.Friendships || [];
+    var friendships = this.state.Friendships;
     var userId = this.props.user._id;
 
     if (friendships.length === 0) return true;
@@ -77,7 +80,7 @@ var NewsFeedView = React.createClass({
               statusPoster={this.props.user}
               statusRecipient={this.props.user}
               appStore={this.props.appStore}/>
-            { _.map(this.props.Actions, (action, key) => {
+            { _.map(this.state.actions, (action, key) => {
               return (
                 <NewsFeedItem action={action} key={key}
                   app={this.props.app}
@@ -90,7 +93,7 @@ var NewsFeedView = React.createClass({
               <strong>Online Friends</strong>
             </p>
             <Loader loaded={this.lazyLoadFriends()} scale={0.8}>
-              { _.compact(_.map(this.props.Friendships, (friendship) => {
+              { _.compact(_.map(this.state.Friendships, (friendship) => {
                 var friendId = friendship.ownerId === userId
                   ? friendship.friendId
                   : friendship.ownerId;
