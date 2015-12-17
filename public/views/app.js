@@ -51,11 +51,8 @@ var App = Backbone.View.extend({
     this.rootProps = _.extend(this.rootProps, {
       app: this,
       user: this.user,
-      Actions: this.appStore.getAll('Actions'),
-      Friendships: this.appStore.getAll('Friendships')
+      Actions: this.appStore.getAll('Actions')
     });
-    console.log(this.appStore);
-    console.log('actions', this.rootProps.Actions);
     // Render the React application
     this.appStore.resetData(
       this.rootProps,
@@ -77,74 +74,75 @@ var App = Backbone.View.extend({
   },
 
   initializeLoggedInUserData(userId, done) {
-    // Make sure the user is cached in appStore.Users
-    this.appStore.fetch([userId], 'Users', () => {
-      // Store the user data from the app store
-      this.user = this.appStore.getModel(userId, 'Users');
-
-      // Remove the user from the rootProps and add him back
-      this.rootProps.Users = _.reject(
-        this.rootProps.Users,
-        function(u) { return u._id === userId; }
-      );
-      this.rootProps.Users.push(this.user);
-
-      done && done();
-    });
-    // The above async stuff will finish, and when the callback
-    // is called, presumably the app should be getting rendered.
-    //
-    // In the mean time, we want to start fetching the multitude
-    // of data that the application will need access to later on
-    // in the lifecycle of the application.
     async.parallel([
-      (done) => { this.initializeFriendsList(userId, done); },
-      (done) => { this.initializeNewsFeed(userId, done); }
-    ], (err) => {
-      err && console.log(err);
-      this.rootProps = _.extend(this.rootProps, {
-        Actions: this.appStore.getAll('Actions')
-      });
-      this.render();
-    });
-  },
+      (next) => {
+        // Make sure the user is cached in appStore.Users
+        this.appStore.fetch([userId], 'Users', () => {
+          // Store the user data from the app store
+          this.user = this.appStore.getModel(userId, 'Users');
 
-  initializeFriendsList(userId, done) {
-    $.get('/api/users/' + userId + '/friendships', (friendships) => {
-      // Reset the list of friends stored in AppStore model hash
-      this.appStore.resetModelHash({
-        Friendships: friendships
-      });
-      // Use a map to quickly extract a list of unique user Id's
-      var idsMap = {};
-      _.each(friendships, (friendship) => {
-        idsMap[friendship.friendId] = true;
-        idsMap[friendship.ownerId] = true;
-      });
-      // Asynchronously fetch and cache all users
-      async.each(_.keys(idsMap), (id, next) => {
-        // If user already cached, don't re-fetch
-        if (this.appStore.getModel(id, 'Users')) {
-          return async.nextTick(next);
-        }
-        // Else, fetch the user data from the JSON API
-        this.appStore.fetch([id], 'Users', next);
+          // Remove the user from the rootProps and add him back
+          this.rootProps.Users = _.reject(
+            this.rootProps.Users,
+            function(u) { return u._id === userId; }
+          );
+          this.rootProps.Users.push(this.user);
+          next();
+        });
       },
-      (err) => {
-        err && console.log(err);
-        done();
-      });
-    });
+      (next) => {
+        this.fetchNewsFeed(userId, (actions) => {
+          // Reset Actions in AppStore
+          this.appStore.resetModelHash({
+            Actions: actions
+          });
+          this.rootProps = _.extend(this.rootProps, {
+            Actions: actions
+          });
+          next();
+        });
+      },
+      (next) => {
+        this.fetchFriendsList(userId, (friendships) => {
+          // Reset the list of friends stored in AppStore model hash
+          this.appStore.resetModelHash({
+            Friendships: friendships
+          });
+          this.initializeFriends(friendships, next);
+        });
+      }
+    ],
+    done);
   },
 
-  initializeNewsFeed(userId, done) {
-    $.get('/api/users/' + userId + '/news-feed', (actions) => {
-      // Reset Actions in AppStore
-      this.appStore.resetModelHash({
-        Actions: actions
-      });
+  fetchFriendsList(userId, done) {
+    $.get('/api/users/' + userId + '/friendships', done);
+  },
+
+  initializeFriends(friendships, done) {
+    // Use a map to quickly extract a list of unique user Id's
+    var idsMap = {};
+    _.each(friendships, (friendship) => {
+      idsMap[friendship.friendId] = true;
+      idsMap[friendship.ownerId] = true;
+    });
+    // Asynchronously fetch and cache all users
+    async.each(_.keys(idsMap), (id, next) => {
+      // If user already cached, don't re-fetch
+      if (this.appStore.getModel(id, 'Users')) {
+        return async.nextTick(next);
+      }
+      // Else, fetch the user data from the JSON API
+      this.appStore.fetch([id], 'Users', next);
+    },
+    (err) => {
+      err && console.log(err);
       done();
     });
+  },
+
+  fetchNewsFeed(userId, done) {
+    $.get('/api/users/' + userId + '/news-feed', done);
   },
 
   login() {
