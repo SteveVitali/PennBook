@@ -36,9 +36,6 @@ exports.update = function(req, res) {
 
 exports.getFriendships = function(req, res) {
   var id = req.params.id;
-  if (req.session.user._id !== id) {
-    return onErr('Unauthorized', res);
-  }
   Friendship.getFriendshipsOfUser(id, function(err, friendships) {
     if (err) return onErr(err, res);
     res.send(friendships);
