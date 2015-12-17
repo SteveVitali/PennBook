@@ -1,28 +1,27 @@
-module.exports = function(vogels, Joi) {
+module.exports = function(vogels, Joi, CRUD) {
 
   var Status = vogels.define('Status', {
-    hashKey: 'recipientEmail',
-    rangeKey: 'statusId',
+    hashKey: '_id',
+    rangeKey: 'datePosted',
     schema: {
-      posterEmail: Joi.string(),
+      _id: vogels.types.uuid(),
+      posterId: Joi.string(),
       // recipient === poster in case of self-post.
-      // in case of wall-post, recipient is the email of the wall posted on
-      recipientEmail: Joi.string(),
-      statusId: Joi.number(),
+      // in case of wall-post, recipient is the id of the wall posted on
+      recipientId: Joi.string(),
       datePosted: Joi.date(),
       content: Joi.string(),
-      likes: vogels.types.stringSet() // of liker emails
+      likes: vogels.types.stringSet() // of liker id's
     },
     indexes: [
-      // Example of a local index (different hashKey)
-      { hashKey: 'recipientEmail',
+      { hashKey: 'posterId',
         rangeKey: 'datePosted',
-        name: 'DatePostedIndex',
-        type: 'local'
+        name: 'PosterIdIndex',
+        type: 'global'
       },
-      { hashKey: 'posterEmail',
+      { hashKey: 'recipientId',
         rangeKey: 'datePosted',
-        name: 'RecipientEmailIndex',
+        name: 'RecipientIdIndex',
         type: 'global'
       }
     ]
@@ -30,9 +29,18 @@ module.exports = function(vogels, Joi) {
 
   Status.config({ tableName: 'statuses' });
 
+  CRUD = CRUD(Status);
+
   return {
     model: Status,
-    tableName: 'statuses'
-    // Additional Status functions here
+    tableName: 'statuses',
+
+    create: function(status, params, callback) {
+      CRUD.create(status, params, callback);
+    },
+
+    findById: function(id, callback) {
+      CRUD.findById(id, callback);
+    }
   };
 };

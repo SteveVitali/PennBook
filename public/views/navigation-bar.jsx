@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
+var AutoCompleteInput = require('./auto-complete-input.jsx');
 
 var NavigationBarView = React.createClass({
   propTypes: {
@@ -24,9 +25,16 @@ var NavigationBarView = React.createClass({
 
   logout() {
     $.post('/logout', () => {
-      this.props.app.user = null;
       this.props.app.login();
     });
+  },
+
+  selectUserFromSearchOptions(data) {
+    console.log('selected', data, 'from search options');
+    this.props.app.router.navigate(
+      '/profile/id/' + data._id,
+      { trigger: true }
+    );
   },
 
   render() {
@@ -48,21 +56,22 @@ var NavigationBarView = React.createClass({
               <span className='icon-bar'></span>
               <span className='icon-bar'></span>
             </button>
-            <a className='navbar-brand' href='#'>Project name</a>
+            <a className='navbar-brand' href='#'>PennBook</a>
           </div>
           <div id='navbar' className='navbar-collapse collapse'>
             <form className='navbar-form navbar-left'>
-              <div className='form-group'>
-                <Input type='text' placeholder='Search'
-                  onChange={(e) => {
-                    this.setState({ searchTerm: e.target.value });
-                  }}
-                  onKeyPress={(e) => {
-                    if (event.keyCode === 13) {
-                      this.search(this.state.searchTerm);
-                    }
-                }}/>
-              </div>
+              <AutoCompleteInput
+                endpoint='/users/regex-search'
+                placeholder='Search'
+                onUpdate={this.selectUserFromSearchOptions}
+                onChange={(e) => {
+                  this.setState({ searchTerm: e.target.value });
+                }}
+                onKeyPress={(e) => {
+                  if (event.keyCode === 13) {
+                    this.search(this.state.searchTerm);
+                  }
+              }}/>
             </form>
             <ul className='nav navbar-nav navbar-right'>
               <NavDropdown title='Settings'>

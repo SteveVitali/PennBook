@@ -3,7 +3,7 @@ var Backbone = require('backbone');
 var model = Backbone.Model.extend({
 
   idAttribute: '_id',
-  urlRoot: '/api/users',
+  urlRoot: '/api/friendships',
 
   defaults: {},
 
@@ -15,7 +15,7 @@ var model = Backbone.Model.extend({
 
 var collection = Backbone.Collection.extend({
   model: model,
-  url: '/api/users'
+  url: '/api/friendship'
 });
 
 module.exports = {

@@ -3,6 +3,7 @@ var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var FormGenerator = require('form-generator-react');
+var utils = require('../utils.js');
 
 var LoginView = React.createClass({
   propTypes: {
@@ -31,8 +32,9 @@ var LoginView = React.createClass({
       url: '/login',
       data: _.pick(this.state, 'email', 'password'),
       success: (user) => {
-        this.props.app.user = user;
-        this.props.app.newsFeed();
+        this.props.app.setUser(user, () => {
+          this.props.app.newsFeed();
+        });
       },
       error: (err) => {
         console.log(err);
@@ -42,9 +44,9 @@ var LoginView = React.createClass({
 
   signup(user) {
     user.birthdate = new Date(
-      user.birthday.year,
-      this.months.indexOf(user.birthday.month),
-      user.birthday.day
+      user.birthdate.year,
+      this.months.indexOf(user.birthdate.month),
+      user.birthdate.day
     );
 
     $.ajax({
@@ -52,8 +54,9 @@ var LoginView = React.createClass({
       url: '/signup',
       data: user,
       success: (newUser) => {
-        this.props.app.user = newUser;
-        this.props.app.newsFeed();
+        this.props.app.setUser(newUser, () => {
+          this.props.app.newsFeed();
+        });
       },
       error: (err) => {
         console.log(err);
@@ -70,8 +73,6 @@ var LoginView = React.createClass({
     var Input = ReactBootstrap.Input;
     var Col = ReactBootstrap.Col;
 
-    var emailRegex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-
     var signupForm = FormGenerator.create({
       firstName: {
         type: String,
@@ -87,12 +88,13 @@ var LoginView = React.createClass({
         type: String,
         label: 'Email',
         isRequired: true,
-        validate: FormGenerator.validators.regex(emailRegex)
+        validate: FormGenerator.validators.regex(utils.emailRegex)
       },
       'password': {
         type: String,
         label: 'Password',
         isRequired: true,
+        isPassword: true,
         validate: FormGenerator.validators.minLength(8)
       },
       'gender': {
@@ -100,7 +102,7 @@ var LoginView = React.createClass({
         enum: ['male', 'female', 'other'],
         label: 'Gender'
       },
-      'birthday': {
+      'birthdate': {
         type: {
           month: {
             type: String,

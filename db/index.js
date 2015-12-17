@@ -4,18 +4,52 @@ var _ = require('lodash');
 
 vogels.AWS.config.loadFromPath('credentials.json');
 
-var User = require('./user')(vogels, Joi);
-var Comment = require('./comment')(vogels, Joi);
-var Friend = require('./friend')(vogels, Joi);
-var FriendRequest = require('./friend-request')(vogels, Joi);
-var Action = require('./action')(vogels, Joi);
-var Status = require('./status')(vogels, Joi);
+// Helpers for doing simple CRUD functions on generic models
+var CRUD = function(model) {
+  return {
+    findById: function(id, callback) {
+      model.query(id).exec(function(err, modelData) {
+        var results = _.pluck(modelData.Items, 'attrs');
+        callback(err, results[0]);
+      });
+    },
+
+    create: function(modelObj, params, callback) {
+      // Make params argument optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = null;
+      }
+      model.create(modelObj, params || {}, function(err, modelData) {
+        callback(err, modelData && modelData.attrs);
+      });
+    },
+
+    update: function(updatedObj, params, callback) {
+      // params are optional
+      if (_.isFunction(params)) {
+        callback = params;
+        params = null;
+      }
+      model.update(updatedObj, params || {}, function(err, modelObj) {
+        callback(err, modelObj && modelObj.attrs);
+      });
+    }
+  };
+};
+
+var User = require('./user')(vogels, Joi, CRUD);
+var Comment = require('./comment')(vogels, Joi, CRUD);
+var Friendship = require('./friendship')(vogels, Joi, CRUD);
+var FriendRequest = require('./friend-request')(vogels, Joi, CRUD);
+var Action = require('./action')(vogels, Joi, CRUD);
+var Status = require('./status')(vogels, Joi, CRUD);
 
 module.exports = {
   User: User,
   Status: Status,
   Comment: Comment,
-  Friend: Friend,
+  Friendship: Friendship,
   Action: Action,
   FriendRequest: FriendRequest
 };

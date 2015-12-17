@@ -3,10 +3,17 @@ var _ = require('lodash');
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var NavigationBarView = require('./navigation-bar.jsx');
+var PostStatusFormView = require('./post-status-form.jsx');
+var NewsFeedItem = require('./news-feed-item.jsx');
+var Loader = require('react-loader');
 
 var NewsFeedView = React.createClass({
   propTypes: {
-    app: React.PropTypes.object.isRequired
+    app: React.PropTypes.object.isRequired,
+    appStore: React.PropTypes.object.isRequired,
+    user: React.PropTypes.object.isRequired,
+    Actions: React.PropTypes.arrayOf(React.PropTypes.object),
+    Friendships: React.PropTypes.arrayOf(React.PropTypes.object)
   },
 
   getDefaultProps() {
@@ -15,12 +22,36 @@ var NewsFeedView = React.createClass({
 
   getInitialState() {
     return {
-      status: ''
+      status: '',
+      cachedFriends: false
     };
   },
 
-  postStatus() {
-    console.log('Posting status', this.state.status);
+  lazyLoadFriends() {
+    if (this.state.cachedFriends) return true;
+
+    var appStore = this.props.appStore;
+    var friendships = this.props.Friendships || [];
+    var userId = this.props.user._id;
+
+    if (friendships.length === 0) return true;
+
+    // Get all the ids of the uncached friends
+    var uncachedUserIds = [];
+    _.each(friendships, function(friendship) {
+      var friendId = friendship.ownerId === userId
+        ? friendship.friendId
+        : friendship.ownerId;
+      if (!appStore.get(friendId, 'Users')) {
+        uncachedUserIds.push(friendId);
+      }
+    });
+    // Now fetch them
+    appStore.fetch(uncachedUserIds, 'Users', () => {
+      this.setState({
+        cachedFriends: true
+      });
+    });
   },
 
   render() {
@@ -29,6 +60,8 @@ var NewsFeedView = React.createClass({
     var Panel = ReactBootstrap.Panel;
     var Button = ReactBootstrap.Button;
     var Input = ReactBootstrap.Input;
+    var userId = this.props.user._id;
+    var appStore = this.props.appStore;
     return (
       <span>
         <NavigationBarView app={this.props.app}/>
@@ -40,16 +73,39 @@ var NewsFeedView = React.createClass({
             <a href='/#profile/edit'>Edit Profile</a>
           </Col>
           <Col md={8}>
-            <Panel header='Update Status'>
-              <Input type='textarea' placeholder="What's on your mind?"
-                onChange={(e) => {
-                  this.setState({ status: e.target.value });
-              }}/>
-              <Button onClick={this.postStatus}>Post</Button>
-            </Panel>
+            <PostStatusFormView app={this.props.app}
+              statusPoster={this.props.user}
+              statusRecipient={this.props.user}
+              appStore={this.props.appStore}/>
+            { _.map(this.props.Actions, (action, key) => {
+              return (
+                <NewsFeedItem action={action} key={key}
+                  app={this.props.app}
+                  appStore={this.props.appStore}/>
+              );
+            })}
           </Col>
           <Col md={2}>
-            Online Friends
+            <p>
+              <strong>Online Friends</strong>
+            </p>
+            <Loader loaded={this.lazyLoadFriends()} scale={0.8}>
+              { _.compact(_.map(this.props.Friendships, (friendship) => {
+                var friendId = friendship.ownerId === userId
+                  ? friendship.friendId
+                  : friendship.ownerId;
+                var friend = appStore.get(friendId, 'Users') || {};
+                if (friend.isLoggedIn) {
+                  return (
+                    <p>
+                      <a href={'/#profile/id/' + friend._id}>
+                        {friend.firstName + ' ' + friend.lastName + ' '}
+                      </a>
+                    </p>
+                  );
+                }
+              }))}
+            </Loader>
           </Col>
         </Row>
         </div>

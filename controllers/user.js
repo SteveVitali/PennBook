@@ -21,14 +21,22 @@ exports.login = function(req, res) {
     if (!passwordHash.verify(password, user.passwordHash)) {
       return onErr('Invalid password', res);
     }
-    req.session.user = user;
-    res.send(user);
+    user.isLoggedIn = true;
+    User.update(user, {}, function(err, user) {
+      if (err) return onErr(err, res);
+      req.session.user = user;
+      res.send(_.omit(user, 'passwordHash'));
+    });
   });
 };
 
 exports.logout = function(req, res) {
-  req.session.destroy();
-  res.redirect('/');
+  req.session.user.isLoggedIn = false;
+  User.update(req.session.user, {}, function(err, user) {
+    if (err) return onErr(err, res);
+    req.session.destroy();
+    res.redirect('/');
+  });
 };
 
 exports.signup = function(req, res) {
@@ -40,7 +48,8 @@ exports.signup = function(req, res) {
     gender: req.body.gender,
     createdAt: new Date(),
     isLoggedIn: true,
-    passwordHash: passwordHash.generate(req.body.password)
+    passwordHash: passwordHash.generate(req.body.password),
+    fullName: [req.body.firstName, req.body.lastName].join(' ')
   };
 
   var valid = _.reduce(_.keys(newUser), function(memo, key) {
@@ -57,7 +66,23 @@ exports.signup = function(req, res) {
 
     User.create(newUser, function(err, user) {
       if (err) return onErr(err, res);
-      res.send(user);
+      req.session.user = user;
+      res.send(_.omit(user, 'passwordHash'));
     });
+  });
+};
+
+exports.regexSearch = function(req, res) {
+  var search = req.params.search;
+  User.regexSearchByName(search, function(err, users) {
+    if (err) return onErr(err, res);
+    var processedResults = _.map(users, function(user) {
+      return {
+        value: user.fullName,
+        label: user.fullName,
+        data: _.omit(user, 'passwordHash')
+      };
+    });
+    res.send(processedResults);
   });
 };

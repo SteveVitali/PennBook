@@ -1,12 +1,14 @@
 var _ = require('lodash');
 
-module.exports = function(vogels, Joi) {
+module.exports = function(vogels, Joi, CRUD) {
 
   var User = vogels.define('User', {
-    hashKey: 'email',
+    hashKey: '_id',
+    rangeKey: 'createdAt',
     schema: {
       _id: vogels.types.uuid(),
       email: Joi.string().email(),
+      fullName: Joi.string(),
       passwordHash: Joi.string(),
       firstName: Joi.string(),
       lastName: Joi.string(),
@@ -22,7 +24,16 @@ module.exports = function(vogels, Joi) {
       phoneNumber: Joi.string()
     },
     indexes: [
-      // Example of a global index (different hashKey)
+      { hashKey: 'email',
+        rangeKey: 'lastName',
+        name: 'EmailIndex',
+        type: 'global'
+      },
+      { hashKey: 'firstName',
+        rangeKey: 'lastName',
+        name: 'NameIndex',
+        type: 'global'
+      },
       { hashKey: 'school',
         rangeKey: 'lastName',
         name: 'SchoolIndex',
@@ -30,7 +41,7 @@ module.exports = function(vogels, Joi) {
       },
       { hashKey: 'work',
         rangeKey: 'lastName',
-        name: 'SchoolIndex',
+        name: 'WorkIndex',
         type: 'global'
       }
     ]
@@ -38,26 +49,57 @@ module.exports = function(vogels, Joi) {
 
   User.config({ tableName: 'users' });
 
+  // Initialize CRUD helpers
+  CRUD = CRUD(User);
+
   return {
     model: User,
     tableName: 'users',
 
-    // Additional User functions here
+    findById: function(id, callback) {
+      CRUD.findById(id, callback);
+    },
+
     findByEmail: function(email, callback) {
-      User.get(email, function(err, user) {
-        // The user object is stored in the 'attrs' field
-        callback(err, user && user.attrs);
+      User
+      .query(email)
+      .usingIndex('EmailIndex')
+      .exec(function(err, data) {
+        var usersData = _.pluck(data.Items, 'attrs');
+        callback(err, usersData[0]);
       });
     },
 
     create: function(user, params, callback) {
-      // Make params argument optional
-      if (_.isFunction(params)) {
-        callback = params;
-        params = null;
-      }
-      User.create(user, params || {}, function(err, userData) {
-        callback(err, userData && userData.attrs);
+      CRUD.create(user, params, callback);
+    },
+
+    // updatedUser must contain _id
+    update: function(updatedUser, params, callback) {
+      // Pre-process by making sure fullName is updated
+      updatedUser.fullName = _.compact([
+        updatedUser.firstName,
+        updatedUser.lastName
+      ]).join(' ');
+
+      CRUD.update(updatedUser, params, callback);
+    },
+
+    regexSearchByName: function(name, callback) {
+      User.scan()
+      .limit(100)
+      .where('fullName').contains(name)
+      .exec(function(err, result) {
+        callback(err, _.pluck(result.Items, 'attrs'));
+      });
+    },
+
+    getAllKeys: function(callback) {
+      User.scan()
+      .attributes(['_id'])
+      .loadAll()
+      .exec(function(err, data) {
+        callback(err, _.pluck(data.Items, 'attrs'));
       });
     }
   };
