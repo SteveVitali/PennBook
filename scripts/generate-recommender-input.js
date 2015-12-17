@@ -10,9 +10,12 @@ models.User.getAllUsers(function(err, data) {
 	async.each(data, function(user, next) {
     var userID = user._id;
 		
-		// Associate the user with their affiliation.
+		// Associate the user with their affiliations.
 		if (user.school) {
 			output += userID + "\t" + user.school.toLowerCase() + "\t0\n";
+		}
+		if (user.work) {
+			output += userID + "\t" + user.work.toLowerCase() + "\t0\n";		
 		}
 		
 		// Associate the user with their interests.
