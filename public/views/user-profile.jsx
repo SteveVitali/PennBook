@@ -84,6 +84,20 @@ var UserProfileView = React.createClass({
     });
   },
 
+  lazyLoadFriends() {
+    if (this.state.friendships) return true;
+    if (!this.state.profileOwner) return false;
+    var userId = this.state.profileOwner._id;
+    $.get('/api/users/' + userId + '/friendships', (friendships) => {
+      this.props.app.initializeFriends(friendships, () => {
+        console.log('Initialized friends');
+        this.setState({
+          friendships: friendships
+        });
+      });
+    });
+  },
+
   isOwnProfile() {
     return this.state.profileOwner &&
            this.props.app.user._id === this.state.profileOwner._id;
@@ -201,7 +215,21 @@ var UserProfileView = React.createClass({
                  profileOwner={this.state.profileOwner}/>
               </Tab>
               <Tab eventKey={3} title='Friends'>
-                Friends
+                <Loader loaded={this.lazyLoadFriends()}>
+                  { _.map(this.state.friendships, (friendship) => {
+                    var friendId = friendship.ownerId === profileUser._id
+                      ? friendship.friendId
+                      : friendship.ownerId;
+                    var friend = this.props.appStore.get(friendId, 'Users');
+                    return (
+                      <p>
+                        <a href={'#/profile/id/' + friend._id}>
+                          {friend.firstName + ' ' + friend.lastName}
+                        </a>
+                      </p>
+                    );
+                  })}
+                </Loader>
               </Tab>
             </Tabs>
           </Loader>
