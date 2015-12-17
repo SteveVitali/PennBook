@@ -28,7 +28,10 @@ var NewsFeedItem = React.createClass({
   },
 
   getInitialState() {
-    var props = this.props;
+    return this.getStateFromProps(this.props);
+  },
+
+  getStateFromProps(props) {
     // If the action object is passed in, use it.
     // Otherwise, check the cache in case action is already loaded.
     var initialAction = props.action
@@ -49,6 +52,10 @@ var NewsFeedItem = React.createClass({
       comments: props.comments,
       comment: ''
     };
+  },
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(this.getStateFromProps(nextProps));
   },
 
   itemType() {

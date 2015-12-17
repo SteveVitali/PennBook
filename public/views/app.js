@@ -8,6 +8,8 @@ var LoginView = require('./login.jsx');
 var NewsFeedView = require('./news-feed.jsx');
 var UserProfileView = require('./user-profile.jsx');
 var models = require('../models');
+var utils = require('../utils.js');
+var POLL_INTERVAL = 30;
 
 var App = Backbone.View.extend({
   el: '#app',
@@ -50,8 +52,7 @@ var App = Backbone.View.extend({
     }
     this.rootProps = _.extend(this.rootProps, {
       app: this,
-      user: this.user,
-      Actions: this.appStore.getAll('Actions')
+      user: this.user
     });
     // Render the React application
     this.appStore.resetData(
@@ -66,35 +67,40 @@ var App = Backbone.View.extend({
     var userId = user._id;
     var cachedUser = this.appStore.getModel(userId, 'Users');
     if (!cachedUser) {
-      this.initializeLoggedInUserData(userId, done);
+      this.initializeLoggedInUser(userId, () => {
+        this.refreshUserData(() => {
+          done();
+        });
+      });
     } else {
       this.user = cachedUser;
       done && done();
     }
   },
 
-  initializeLoggedInUserData(userId, done) {
+  initializeLoggedInUser(userId, done) {
+    // Make sure the user is cached in appStore.Users
+    this.appStore.fetch([userId], 'Users', () => {
+      // Store the user data from the app store
+      this.user = this.appStore.getModel(userId, 'Users');
+
+      // Remove the user from the rootProps and add him back
+      this.rootProps.Users = _.reject(
+        this.rootProps.Users,
+        (u) => { return u._id === userId; }
+      );
+      this.rootProps.Users.push(this.user);
+      done();
+    });
+  },
+
+  refreshUserData(done) {
     async.parallel([
       (next) => {
-        // Make sure the user is cached in appStore.Users
-        this.appStore.fetch([userId], 'Users', () => {
-          // Store the user data from the app store
-          this.user = this.appStore.getModel(userId, 'Users');
-
-          // Remove the user from the rootProps and add him back
-          this.rootProps.Users = _.reject(
-            this.rootProps.Users,
-            function(u) { return u._id === userId; }
-          );
-          this.rootProps.Users.push(this.user);
-          next();
-        });
+        this.resetNewsFeed(next);
       },
       (next) => {
-        this.resetNewsFeed(userId, next);
-      },
-      (next) => {
-        this.fetchFriendsList(userId, (friendships) => {
+        this.fetchFriendsList(this.user._id, (friendships) => {
           // Reset the list of friends stored in AppStore model hash
           this.appStore.resetModelHash({
             Friendships: friendships
@@ -104,10 +110,6 @@ var App = Backbone.View.extend({
       }
     ],
     done);
-  },
-
-  fetchFriendsList(userId, done) {
-    $.get('/api/users/' + userId + '/friendships', done);
   },
 
   initializeFriends(friendships, done) {
@@ -132,8 +134,8 @@ var App = Backbone.View.extend({
     });
   },
 
-  resetNewsFeed(userId, done) {
-    this.fetchNewsFeed(userId, (actions) => {
+  resetNewsFeed(done) {
+    this.fetchNewsFeed((actions) => {
       // Reset Actions in AppStore
       this.appStore.resetModelHash({
         Actions: actions
@@ -145,8 +147,12 @@ var App = Backbone.View.extend({
     });
   },
 
-  fetchNewsFeed(userId, done) {
-    $.get('/api/users/' + userId + '/news-feed', done);
+  fetchFriendsList(userId, done) {
+    $.get('/api/users/' + userId + '/friendships', done);
+  },
+
+  fetchNewsFeed(done) {
+    $.get('/api/users/' + this.user._id + '/news-feed', done);
   },
 
   login() {
@@ -214,4 +220,10 @@ $(function() {
 
     Backbone.history.start({ root: '/' });
   });
+  utils.poll((done) => {
+    app.refreshUserData(() => {
+      app.render();
+      done();
+    });
+  }, POLL_INTERVAL);
 });

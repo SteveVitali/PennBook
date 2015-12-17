@@ -80,7 +80,7 @@ var NewsFeedView = React.createClass({
 
   onStatusPost() {
     var userId = this.props.user._id;
-    this.props.app.resetNewsFeed(userId, () => {
+    this.props.app.resetNewsFeed(() => {
       this.props.app.render();
     });
   },
