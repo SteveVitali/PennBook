@@ -43,7 +43,7 @@ var UserProfileView = React.createClass({
       tabKey: nextProps.tabKey,
       profileOwner: nextProps.profileOwner,
       actions: null,
-      isFriendProfile: this.isFriendProfile()
+      friendship: this.getProfileFriendship()
     });
   },
 
@@ -71,7 +71,7 @@ var UserProfileView = React.createClass({
   lazyLoadFeed() {
     if (!this.lazyLoadUser()) return false;
     if (this.state.actions) return true;
-    if (!this.state.isFriendProfile && !this.isOwnProfile()) return true;
+    if (!this.state.friendship && !this.isOwnProfile()) return true;
 
     var userId = this.state.profileOwner._id;
     $.get('/api/users/' + userId + '/profile-feed', (actions) => {
@@ -86,27 +86,29 @@ var UserProfileView = React.createClass({
            this.props.app.user._id === this.state.profileOwner._id;
   },
 
-  isFriendProfile() {
+  getProfileFriendship() {
     var allFriends = this.props.appStore.getAll('Friendships');
     var profileId = this.props.profileOwnerId || this.state.profileOwner._id;
     var userId = this.props.user._id;
 
-    return !!_.find(allFriends, function(rel) {
+    // Return the friendship if one exists
+    return _.find(allFriends, function(rel) {
       return (rel.ownerId === profileId && rel.friendId === userId) ||
              (rel.ownerId === userId && rel.friendId === profileId);
     });
   },
 
   unfriend() {
-    var userId = this.props.user._id;
-    var friendId = this.props.profileOwner._id;
+    var id = this.state.friendship._id;
     $.ajax({
-      type: 'post',
-      url: '/api/users/' + userId + '/add-friend/' + friendId,
+      type: 'delete',
+      url: '/api/friendships/' + id,
       success: () => {
-        console.log('Successfully friended user');
+        console.log('Successfully unfriended user');
+        // Update appStore explicitly
+        this.props.appStore.modelHash.Friendships.remove(id);
         this.setState({
-          isFriendProfile: true
+          friendship: null
         });
       },
       error: (err) => {
@@ -116,15 +118,18 @@ var UserProfileView = React.createClass({
   },
 
   addFriend() {
-    var userId = this.props.user._id;
-    var friendId = this.props.profileOwner._id;
     $.ajax({
       type: 'post',
-      url: '/api/users/' + userId + '/unfriend/' + friendId,
-      success: () => {
-        console.log('Successfully unfriended user');
+      url: '/api/friendships',
+      data: {
+        ownerId: this.props.user._id,
+        friendId: this.state.profileOwner._id
+      },
+      success: (friendship) => {
+        console.log('Successfully friended user', friendship);
+        this.props.appStore.add(friendship, 'Friendships');
         this.setState({
-          isFriendProfile: false
+          friendship: friendship
         });
       },
       error: (err) => {
@@ -139,7 +144,7 @@ var UserProfileView = React.createClass({
     var Row = ReactBootstrap.Row;
     var Col = ReactBootstrap.Col;
     var Button = ReactBootstrap.Button;
-    var buttonData = this.state.isFriendProfile
+    var buttonData = this.state.friendship
       ? { text: 'Unfriend', onClick: this.unfriend }
       : { text: 'Add Friend', onClick: this.addFriend };
 
@@ -168,7 +173,7 @@ var UserProfileView = React.createClass({
             <Tabs activeKey={this.state.tabKey}
               animation={false}
               onSelect={this.handleSelectTab}>
-              { (this.state.isFriendProfile || this.isOwnProfile()) && (
+              { (!!this.state.friendship || this.isOwnProfile()) && (
                 <Tab eventKey={1} title='Timeline'>
                   <PostStatusFormView app={this.props.app}
                     statusPoster={this.props.user}

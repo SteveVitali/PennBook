@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var async = require('async');
 
 module.exports = function(vogels, Joi, CRUD) {
   // We store for each friendship, two rows in the KVS.
@@ -37,7 +38,6 @@ module.exports = function(vogels, Joi, CRUD) {
     model: Friendship,
     tableName: 'friendships',
 
-    // Additional functions here
     create: function(friendship, params, callback) {
 			// Make sure to add the other edge of this friendship to the table.
 			var inverse = {
@@ -45,15 +45,13 @@ module.exports = function(vogels, Joi, CRUD) {
 				friendId: friendship.ownerId,
 				dateFriended: friendship.dateFriended
 			};
-			if (callback) {
-				CRUD.create(friendship, params, function(err, data) {
-					CRUD.create(inverse, params, callback);
-				});
-			} else {
-				CRUD.create(friendship, function(err, data) {
-					CRUD.create(inverse, params, callback);
-				});
-			}
+
+      CRUD.create(inverse, params, function(err, friendship) {
+        if (err) return callback(err);
+        CRUD.create(friendship, params, function(err, friendship) {
+          callback(err, friendship);
+        });
+      });
     },
 
     getFriendshipsOfUser: function(userId, callback) {

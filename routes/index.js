@@ -3,7 +3,6 @@ var router = express.Router();
 
 var api = require('../controllers/api');
 var user = require('../controllers/user');
-var friend = require('../controllers/friend');
 var vis = require('../controllers/visualize');
 
 var isLoggedIn = function(req) {
@@ -31,16 +30,14 @@ module.exports = function(app) {
   app.post('/signup', user.signup);
   app.get('/users/regex-search/:search', user.regexSearch);
 
-  app.get('/request-friend/:email', loggedIn, friend.request);
-  app.get('/confirm-friend/:email', loggedIn, friend.confirmRequest);
-  app.get('/deny-friend/:email', loggedIn, friend.denyRequest);
-
   // JSON endpoints
   app.get('/api/users/:id', loggedIn, api.User.findById);
   app.put('/api/users/:id', loggedIn, api.User.update);
   app.get('/api/users/:id/friendships', loggedIn, api.User.getFriendships);
   app.get('/api/users/:id/news-feed', loggedIn, api.User.getNewsFeed);
   app.get('/api/users/:id/profile-feed', loggedIn, api.User.getProfileFeed);
+
+  app.post('/api/friendships', loggedIn, api.Friendship.create);
 
   app.get('/api/statuses/:id', loggedIn, api.Status.findById);
   app.post('/api/statuses', loggedIn, api.Status.post);
