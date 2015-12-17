@@ -42,7 +42,7 @@ var UserProfileView = React.createClass({
 
   componentWillReceiveProps(nextProps) {
     this.setState({
-      tabKey: nextProps.tabKey,
+      tabKey: nextProps.tabKey || 1,
       profileOwner: nextProps.profileOwner,
       actions: null,
       friendship: this.getProfileFriendship(nextProps),
@@ -155,6 +155,11 @@ var UserProfileView = React.createClass({
     });
   },
 
+  onWallPost() {
+    console.log('wall post posted');
+    this.props.app.render();
+  },
+
   render() {
     var Tabs = ReactBootstrap.Tabs;
     var Tab = ReactBootstrap.Tab;
@@ -195,6 +200,7 @@ var UserProfileView = React.createClass({
               { (!!this.state.friendship || this.isOwnProfile()) && (
                 <Tab eventKey={1} title='Timeline'>
                   <PostStatusFormView app={this.props.app}
+                    onSubmit={this.onWallPost}
                     statusPoster={this.props.user}
                     statusRecipient={this.state.profileOwner}
                     appStore={this.props.appStore}/>

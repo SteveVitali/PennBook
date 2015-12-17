@@ -7,7 +7,8 @@ var PostStatusFormView = React.createClass({
     app: React.PropTypes.object.isRequired,
     statusPoster: React.PropTypes.object.isRequired,
     statusRecipient: React.PropTypes.object.isRequired,
-    appStore: React.PropTypes.object
+    appStore: React.PropTypes.object,
+    onSubmit: React.PropTypes.func
   },
 
   getDefaultProps() {
@@ -40,7 +41,9 @@ var PostStatusFormView = React.createClass({
         this.setState({
           status: '',
           submitDisabled: false
-        }, () => { this.props.app.render(); });
+        }, () => {
+          this.props.onSubmit && this.props.onSubmit();
+        });
       },
       error: (err) => {
         console.log(err);

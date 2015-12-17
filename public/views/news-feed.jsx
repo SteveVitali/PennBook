@@ -30,6 +30,17 @@ var NewsFeedView = React.createClass({
     };
   },
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      status: '',
+      cachedFriends: false,
+      Friendships: nextProps.appStore.getAll('Friendships'),
+      actions: _.sortBy(nextProps.Actions, function(action) {
+        return -1 * (new Date(action.datetime)).getTime();
+      })
+    });
+  },
+
   lazyLoadFriends() {
     if (this.state.cachedFriends) return true;
 
@@ -61,10 +72,16 @@ var NewsFeedView = React.createClass({
     if (this.state.recommendations) return true;
     var userId = this.props.user._id;
     $.get('/api/users/' + userId + '/recommended-friends', (people) => {
-      console.log('fetched recommendations', people);
       this.setState({
         recommendations: people
       });
+    });
+  },
+
+  onStatusPost() {
+    var userId = this.props.user._id;
+    this.props.app.resetNewsFeed(userId, () => {
+      this.props.app.render();
     });
   },
 
@@ -89,6 +106,7 @@ var NewsFeedView = React.createClass({
           </Col>
           <Col md={8}>
             <PostStatusFormView app={this.props.app}
+              onSubmit={this.onStatusPost}
               statusPoster={this.props.user}
               statusRecipient={this.props.user}
               appStore={this.props.appStore}/>

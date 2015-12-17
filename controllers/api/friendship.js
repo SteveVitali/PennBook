@@ -38,19 +38,19 @@ exports.create = function(req, res) {
 exports.destroy = function(req, res) {
   var friendshipId = req.params.id;
   var userId = req.session.user._id;
-  console.log('destroy', friendshipId, userId);
   async.waterfall([
     function findById(done) {
       Friendship.findById(friendshipId, done);
     },
     function getFriendshipObjects(friendship, done) {
-      console.log('got friendship', friendship);
       var ownerId = friendship.ownerId;
       var friendId = friendship.friendId;
+      if (ownerId !== userId && friendId !== userId) {
+        return onErr('Unauthorized deletion', res);
+      }
       Friendship.findByUserIds(ownerId, friendId, done);
     },
     function destroyFriendships(friendships, done) {
-      console.log('got both friendships', friendships);
       Friendship.destroy(friendships, {}, done);
     }
   ],

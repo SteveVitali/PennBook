@@ -53,7 +53,6 @@ var App = Backbone.View.extend({
       user: this.user,
       Actions: this.appStore.getAll('Actions')
     });
-    console.log('render', this.rootProps);
     // Render the React application
     this.appStore.resetData(
       this.rootProps,
@@ -92,20 +91,10 @@ var App = Backbone.View.extend({
         });
       },
       (next) => {
-        this.fetchNewsFeed(userId, (actions) => {
-          // Reset Actions in AppStore
-          this.appStore.resetModelHash({
-            Actions: actions
-          });
-          this.rootProps = _.extend(this.rootProps, {
-            Actions: actions
-          });
-          next();
-        });
+        this.resetNewsFeed(userId, next);
       },
       (next) => {
         this.fetchFriendsList(userId, (friendships) => {
-          console.log('got friendships', friendships);
           // Reset the list of friends stored in AppStore model hash
           this.appStore.resetModelHash({
             Friendships: friendships
@@ -138,8 +127,20 @@ var App = Backbone.View.extend({
       this.appStore.fetch([id], 'Users', next);
     },
     (err) => {
-      console.log('initialized friends', this.appStore.modelHash.Users.toJSON());
       err && console.log(err);
+      done();
+    });
+  },
+
+  resetNewsFeed(userId, done) {
+    this.fetchNewsFeed(userId, (actions) => {
+      // Reset Actions in AppStore
+      this.appStore.resetModelHash({
+        Actions: actions
+      });
+      this.rootProps = _.extend(this.rootProps, {
+        Actions: actions
+      });
       done();
     });
   },
